@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# college evaluation docs
+*.docx
+POS_AND_PSO*
+PROGRAM_OUTCOMES*
+
