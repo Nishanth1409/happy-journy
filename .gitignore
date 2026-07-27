@@ -30,8 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files / secrets (never commit)
 .env*
+*firebase-adminsdk*.json
 
 # vercel
 .vercel
@@ -40,8 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local secrets
-*firebase-adminsdk*.json
-.env.local
-.env
-
+# college evaluation docs (kept locally under academic/, not in app repo)
+*.docx
+POS_AND_PSO*
+PROGRAM_OUTCOMES*
