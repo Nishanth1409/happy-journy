@@ -25,7 +25,10 @@ export type CostModel = {
   baseFare?: number; // INR
 };
 
-export function estimateCostInINR(distanceKm: number, model: CostModel): number {
+export function estimateCostInINR(
+  distanceKm: number,
+  model: CostModel,
+): number {
   const base = model.baseFare ?? 0;
   return Math.round(base + distanceKm * model.perKm);
 }
@@ -39,5 +42,3 @@ export function parseLatLng(input: string): Coordinates | null {
   if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
   return { lat, lng };
 }
-
-

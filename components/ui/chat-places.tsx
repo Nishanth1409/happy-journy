@@ -1,28 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { MapButton } from "@/components/maps/map-button";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { generateMapsSearchUrl } from "@/lib/maps";
-import { MapPin } from "lucide-react";
 
-export default function ChatPlaces({ defaultCity }: { defaultCity?: string | null }) {
+export default function ChatPlaces({
+  defaultCity,
+}: {
+  defaultCity?: string | null;
+}) {
   const [city, setCity] = useState<string | null>(defaultCity || null);
   const [message, setMessage] = useState("");
-  const [places, setPlaces] = useState<Array<{ title: string; description: string; imageUrl?: string | null }>>([]);
+  const [places, setPlaces] = useState<
+    Array<{ title: string; description: string; imageUrl?: string | null }>
+  >([]);
   const [loading, setLoading] = useState(false);
 
   // Keep city in sync with navbar
   useEffect(() => {
     const handler = (e: any) => setCity(e?.detail || null);
-    if (typeof window !== 'undefined') {
-      // @ts-ignore
+    if (typeof window !== "undefined") {
       setCity((window as any).__NAV_CITY__ || defaultCity || null);
-      window.addEventListener('nav-city', handler as any);
+      window.addEventListener("nav-city", handler as any);
     }
     return () => {
-      if (typeof window !== 'undefined') window.removeEventListener('nav-city', handler as any);
+      if (typeof window !== "undefined")
+        window.removeEventListener("nav-city", handler as any);
     };
   }, [defaultCity]);
 
@@ -33,7 +38,11 @@ export default function ChatPlaces({ defaultCity }: { defaultCity?: string | nul
       const res = await fetch("/api/ai/chat-places", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: message.trim(), city: city || undefined, count: 8 }),
+        body: JSON.stringify({
+          message: message.trim(),
+          city: city || undefined,
+          count: 8,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -47,15 +56,29 @@ export default function ChatPlaces({ defaultCity }: { defaultCity?: string | nul
   return (
     <div className="space-y-3">
       <div className="flex gap-2 items-center">
-        <Input placeholder="Ask e.g., best temples, waterfalls, cafes" value={message} onChange={(e) => setMessage(e.target.value)} />
-        <Button onClick={send} disabled={loading}>Ask</Button>
+        <Input
+          placeholder="Ask e.g., best temples, waterfalls, cafes"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <Button onClick={send} disabled={loading}>
+          Ask
+        </Button>
       </div>
-      {city && (<div className="text-xs text-muted-foreground">Using location: <span className="font-medium">{city}</span></div>)}
-      {loading && <div className="text-sm text-muted-foreground">Fetching places…</div>}
+      {city && (
+        <div className="text-xs text-muted-foreground">
+          Using location: <span className="font-medium">{city}</span>
+        </div>
+      )}
+      {loading && (
+        <div className="text-sm text-muted-foreground">Fetching places…</div>
+      )}
       {places.length > 0 && (
         <div className="bg-muted/30 rounded-lg p-4">
           <div className="text-sm text-muted-foreground mb-2">
-            {city ? `Here are the ${message} in ${city}:` : `Here are the ${message} in your area:`}
+            {city
+              ? `Here are the ${message} in ${city}:`
+              : `Here are the ${message} in your area:`}
           </div>
           <div className="space-y-1">
             {places.map((p, i) => (
@@ -64,10 +87,12 @@ export default function ChatPlaces({ defaultCity }: { defaultCity?: string | nul
                   <span className="text-sm">•</span>
                   <span className="text-sm font-medium">{p.title}</span>
                 </div>
-                <MapButton 
-                  url={generateMapsSearchUrl(`${p.title}${city ? ", " + city : ""}, India`)} 
-                  title={`Directions to ${p.title}`} 
-                  size="sm" 
+                <MapButton
+                  url={generateMapsSearchUrl(
+                    `${p.title}${city ? `, ${city}` : ""}, India`,
+                  )}
+                  title={`Directions to ${p.title}`}
+                  size="sm"
                   variant="ghost"
                   className="h-6 px-2 text-xs"
                 />
@@ -79,5 +104,3 @@ export default function ChatPlaces({ defaultCity }: { defaultCity?: string | nul
     </div>
   );
 }
-
-

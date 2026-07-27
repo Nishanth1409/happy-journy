@@ -33,7 +33,6 @@ git push origin master   # updates GitHub → Vercel
 
 ## Related (not this runtime app)
 
-- `archive/happy-journey-legacy` — old Prisma variant  
 - `academic/happy-journey-reports` — college documents  
 
 Updated: 2026-07-27

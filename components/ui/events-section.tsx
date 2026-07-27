@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar, Filter, MapPin } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { EventCard } from "./event-card";
-import { Calendar, MapPin, Filter } from "lucide-react";
 
 interface Event {
   id: string;
@@ -38,17 +44,22 @@ interface EventsSectionProps {
   showModeToggle?: boolean;
 }
 
-export function EventsSection({ city, limit = 6, showRecent = false, showModeToggle = false }: EventsSectionProps) {
+export function EventsSection({
+  city,
+  limit = 6,
+  showRecent = false,
+  showModeToggle = false,
+}: EventsSectionProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
-  const [currentMode, setCurrentMode] = useState<'recent' | 'nearby'>('recent');
+  const [currentMode, setCurrentMode] = useState<"recent" | "nearby">("recent");
 
   const categories = [
     "Cultural Festival",
-    "Music & Entertainment", 
+    "Music & Entertainment",
     "Food & Culinary",
     "Adventure & Sports",
     "Art & Exhibition",
@@ -56,18 +67,20 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
     "Educational & Workshop",
     "Business & Networking",
     "Health & Wellness",
-    "General"
+    "General",
   ];
 
   useEffect(() => {
     fetchEvents();
-  }, [city, limit, showRecent, showModeToggle, currentMode]);
+  }, [fetchEvents]);
 
   useEffect(() => {
     if (selectedCategory === "all") {
       setFilteredEvents(events);
     } else {
-      setFilteredEvents(events.filter(event => event.category === selectedCategory));
+      setFilteredEvents(
+        events.filter((event) => event.category === selectedCategory),
+      );
     }
   }, [events, selectedCategory]);
 
@@ -76,19 +89,21 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
     setError(null);
     try {
       const params = new URLSearchParams();
-      
+
       // Determine the mode to use
-      const useRecentMode = showModeToggle ? currentMode === 'recent' : showRecent;
-      
+      const useRecentMode = showModeToggle
+        ? currentMode === "recent"
+        : showRecent;
+
       if (city && !useRecentMode) params.append("city", city);
       if (useRecentMode) params.append("recent", "true");
       params.append("limit", limit.toString());
-      
+
       const response = await fetch(`/api/events?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch events");
       }
-      
+
       const data = await response.json();
       setEvents(data.events || []);
     } catch (err) {
@@ -105,35 +120,39 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              {showModeToggle ? 
-                (currentMode === 'recent' ? "Recent Events" : "Nearby Events") : 
-                "Upcoming Events"
-              }
+              {showModeToggle
+                ? currentMode === "recent"
+                  ? "Recent Events"
+                  : "Nearby Events"
+                : "Upcoming Events"}
             </CardTitle>
-            
+
             <div className="flex items-center gap-2">
               {showModeToggle && (
                 <div className="flex items-center gap-1 mr-4">
                   <Button
-                    variant={currentMode === 'recent' ? 'default' : 'outline'}
+                    variant={currentMode === "recent" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentMode('recent')}
+                    onClick={() => setCurrentMode("recent")}
                   >
                     Recent
                   </Button>
                   <Button
-                    variant={currentMode === 'nearby' ? 'default' : 'outline'}
+                    variant={currentMode === "nearby" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentMode('nearby')}
+                    onClick={() => setCurrentMode("nearby")}
                   >
                     Nearby
                   </Button>
                 </div>
               )}
-              
+
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-muted-foreground" />
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by category" />
                   </SelectTrigger>
@@ -167,35 +186,39 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              {showModeToggle ? 
-                (currentMode === 'recent' ? "Recent Events" : "Nearby Events") : 
-                "Upcoming Events"
-              }
+              {showModeToggle
+                ? currentMode === "recent"
+                  ? "Recent Events"
+                  : "Nearby Events"
+                : "Upcoming Events"}
             </CardTitle>
-            
+
             <div className="flex items-center gap-2">
               {showModeToggle && (
                 <div className="flex items-center gap-1 mr-4">
                   <Button
-                    variant={currentMode === 'recent' ? 'default' : 'outline'}
+                    variant={currentMode === "recent" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentMode('recent')}
+                    onClick={() => setCurrentMode("recent")}
                   >
                     Recent
                   </Button>
                   <Button
-                    variant={currentMode === 'nearby' ? 'default' : 'outline'}
+                    variant={currentMode === "nearby" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentMode('nearby')}
+                    onClick={() => setCurrentMode("nearby")}
                   >
                     Nearby
                   </Button>
                 </div>
               )}
-              
+
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-muted-foreground" />
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by category" />
                   </SelectTrigger>
@@ -231,35 +254,39 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              {showModeToggle ? 
-                (currentMode === 'recent' ? "Recent Events" : "Nearby Events") : 
-                "Upcoming Events"
-              }
+              {showModeToggle
+                ? currentMode === "recent"
+                  ? "Recent Events"
+                  : "Nearby Events"
+                : "Upcoming Events"}
             </CardTitle>
-            
+
             <div className="flex items-center gap-2">
               {showModeToggle && (
                 <div className="flex items-center gap-1 mr-4">
                   <Button
-                    variant={currentMode === 'recent' ? 'default' : 'outline'}
+                    variant={currentMode === "recent" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentMode('recent')}
+                    onClick={() => setCurrentMode("recent")}
                   >
                     Recent
                   </Button>
                   <Button
-                    variant={currentMode === 'nearby' ? 'default' : 'outline'}
+                    variant={currentMode === "nearby" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentMode('nearby')}
+                    onClick={() => setCurrentMode("nearby")}
                   >
                     Nearby
                   </Button>
                 </div>
               )}
-              
+
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-muted-foreground" />
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by category" />
                   </SelectTrigger>
@@ -280,7 +307,9 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
           <div className="text-center py-8">
             <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">
-              {city ? `No upcoming events in ${city}` : "No upcoming events available"}
+              {city
+                ? `No upcoming events in ${city}`
+                : "No upcoming events available"}
             </p>
           </div>
         </CardContent>
@@ -294,36 +323,42 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            {showModeToggle ? 
-              (currentMode === 'recent' ? "Recent Events" : "Nearby Events") : 
-              (showRecent ? "Recent Events" : "Upcoming Events")
-            }
+            {showModeToggle
+              ? currentMode === "recent"
+                ? "Recent Events"
+                : "Nearby Events"
+              : showRecent
+                ? "Recent Events"
+                : "Upcoming Events"}
             <Badge variant="secondary">{filteredEvents.length}</Badge>
           </CardTitle>
-          
+
           <div className="flex items-center gap-2">
             {showModeToggle && (
               <div className="flex items-center gap-1 mr-4">
                 <Button
-                  variant={currentMode === 'recent' ? 'default' : 'outline'}
+                  variant={currentMode === "recent" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentMode('recent')}
+                  onClick={() => setCurrentMode("recent")}
                 >
                   Recent
                 </Button>
                 <Button
-                  variant={currentMode === 'nearby' ? 'default' : 'outline'}
+                  variant={currentMode === "nearby" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setCurrentMode('nearby')}
+                  onClick={() => setCurrentMode("nearby")}
                 >
                   Nearby
                 </Button>
               </div>
             )}
-            
+
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-muted-foreground" />
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Filter by category" />
                 </SelectTrigger>
@@ -340,12 +375,12 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
           </div>
         </div>
         {showModeToggle ? (
-          currentMode === 'nearby' && city ? (
+          currentMode === "nearby" && city ? (
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               <MapPin className="w-4 h-4" />
               Showing events in {city}
             </p>
-          ) : currentMode === 'recent' ? (
+          ) : currentMode === "recent" ? (
             <p className="text-sm text-muted-foreground">
               Showing recently added events
             </p>
@@ -370,7 +405,7 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
           </>
         )}
       </CardHeader>
-      
+
       <CardContent>
         {filteredEvents.length === 0 ? (
           <div className="text-center py-8">
@@ -378,60 +413,71 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
               No events found in the selected category
             </p>
           </div>
-        ) : (() => {
-          // Check if we're in Recent Events mode
-          const isRecentMode = showModeToggle ? currentMode === 'recent' : showRecent;
-          // Show carousel if in Recent Events mode and there are more than 3 cards
-          const shouldShowCarousel = isRecentMode && filteredEvents.length > 3;
-          
-          if (shouldShowCarousel) {
-            // Duplicate events for seamless loop
-            const duplicatedEvents = [...filteredEvents, ...filteredEvents];
-            // Calculate animation duration based on number of cards (slower for more cards)
-            const animationDuration = Math.max(filteredEvents.length * 20, 60);
-            
-            // Component for carousel with dynamic animation duration
-            const CarouselContainer = () => {
-              const carouselRef = useRef<HTMLDivElement>(null);
-              
-              useEffect(() => {
-                if (carouselRef.current) {
-                  carouselRef.current.style.setProperty('--animation-duration', `${animationDuration}s`);
-                }
-              }, [animationDuration]);
-              
-              return (
-                <div className="relative overflow-hidden w-full">
-                  <div 
-                    ref={carouselRef}
-                    className="flex gap-4 events-carousel-scroll"
-                  >
-                    {duplicatedEvents.map((event, index) => (
-                      <div 
-                        key={`${event.id}-${index}`} 
-                        className="flex-shrink-0 w-[280px] md:w-[300px]"
-                      >
-                        <EventCard event={event} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+        ) : (
+          (() => {
+            // Check if we're in Recent Events mode
+            const isRecentMode = showModeToggle
+              ? currentMode === "recent"
+              : showRecent;
+            // Show carousel if in Recent Events mode and there are more than 3 cards
+            const shouldShowCarousel =
+              isRecentMode && filteredEvents.length > 3;
+
+            if (shouldShowCarousel) {
+              // Duplicate events for seamless loop
+              const duplicatedEvents = [...filteredEvents, ...filteredEvents];
+              // Calculate animation duration based on number of cards (slower for more cards)
+              const animationDuration = Math.max(
+                filteredEvents.length * 20,
+                60,
               );
-            };
-            
-            return <CarouselContainer />;
-          }
-          
-          // Default grid layout for other modes or when there are few cards
-          return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {filteredEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          );
-        })()}
-        
+
+              // Component for carousel with dynamic animation duration
+              const CarouselContainer = () => {
+                const carouselRef = useRef<HTMLDivElement>(null);
+
+                useEffect(() => {
+                  if (carouselRef.current) {
+                    carouselRef.current.style.setProperty(
+                      "--animation-duration",
+                      `${animationDuration}s`,
+                    );
+                  }
+                }, []);
+
+                return (
+                  <div className="relative overflow-hidden w-full">
+                    <div
+                      ref={carouselRef}
+                      className="flex gap-4 events-carousel-scroll"
+                    >
+                      {duplicatedEvents.map((event, index) => (
+                        <div
+                          key={`${event.id}-${index}`}
+                          className="flex-shrink-0 w-[280px] md:w-[300px]"
+                        >
+                          <EventCard event={event} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              };
+
+              return <CarouselContainer />;
+            }
+
+            // Default grid layout for other modes or when there are few cards
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {filteredEvents.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            );
+          })()
+        )}
+
         {events.length >= limit && (
           <div className="text-center mt-6">
             <Button variant="outline" asChild>

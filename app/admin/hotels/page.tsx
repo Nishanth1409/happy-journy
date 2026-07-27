@@ -1,39 +1,59 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
+import {
+  Download,
+  Edit,
+  FileSpreadsheet,
+  Star,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import useSWR, { mutate } from "swr";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Edit, Star, Upload, Download, FileSpreadsheet } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 // Function to render star rating
 function renderStarRating(rating: number) {
   if (!rating) return null;
-  
+
   const stars = [];
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 !== 0;
-  
+
   for (let i = 0; i < fullStars; i++) {
-    stars.push(<Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />);
+    stars.push(
+      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />,
+    );
   }
-  
+
   if (hasHalfStar) {
-    stars.push(<Star key="half" className="w-3 h-3 fill-yellow-400/50 text-yellow-400" />);
+    stars.push(
+      <Star
+        key="half"
+        className="w-3 h-3 fill-yellow-400/50 text-yellow-400"
+      />,
+    );
   }
-  
+
   const emptyStars = 5 - Math.ceil(rating);
   for (let i = 0; i < emptyStars; i++) {
     stars.push(<Star key={`empty-${i}`} className="w-3 h-3 text-gray-300" />);
   }
-  
+
   return (
     <div className="flex items-center gap-1">
       <div className="flex">{stars}</div>
@@ -47,7 +67,11 @@ export default function AdminHotelsPage() {
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
-  const [adminInfo, setAdminInfo] = useState<{userEmail?: string, userId?: string, accessType?: string} | null>(null);
+  const [_adminInfo, setAdminInfo] = useState<{
+    userEmail?: string;
+    userId?: string;
+    accessType?: string;
+  } | null>(null);
   const [deletingHotelId, setDeletingHotelId] = useState<string | null>(null);
   const [editingHotel, setEditingHotel] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
@@ -69,12 +93,12 @@ export default function AdminHotelsPage() {
   useEffect(() => {
     async function checkAdminStatus() {
       if (!isLoaded) return;
-      
+
       if (!userId) {
         router.push("/");
         return;
       }
-      
+
       try {
         const response = await fetch("/api/admin/hotels");
         if (response.ok) {
@@ -90,11 +114,14 @@ export default function AdminHotelsPage() {
         setIsChecking(false);
       }
     }
-    
+
     checkAdminStatus();
   }, [userId, isLoaded, router]);
 
-  const { data, isLoading } = useSWR(isAdmin ? "/api/admin/hotels" : null, fetcher);
+  const { data, isLoading } = useSWR(
+    isAdmin ? "/api/admin/hotels" : null,
+    fetcher,
+  );
   const hotels = data?.hotels || [];
 
   // Show loading while checking admin status
@@ -115,13 +142,27 @@ export default function AdminHotelsPage() {
   }
 
   async function addHotel() {
-    if (!form.name.trim()) { alert("Name is required"); return; }
-    if (!form.city.trim()) { alert("City is required"); return; }
+    if (!form.name.trim()) {
+      alert("Name is required");
+      return;
+    }
+    if (!form.city.trim()) {
+      alert("City is required");
+      return;
+    }
     const payload = {
       ...form,
-      pricePerNightINR: form.pricePerNightINR ? Number(form.pricePerNightINR) : undefined,
-      rating: form.rating && form.rating !== "0" ? Number(form.rating) : undefined,
-      amenities: form.amenities ? form.amenities.split(",").map((s) => s.trim()).filter(Boolean) : [],
+      pricePerNightINR: form.pricePerNightINR
+        ? Number(form.pricePerNightINR)
+        : undefined,
+      rating:
+        form.rating && form.rating !== "0" ? Number(form.rating) : undefined,
+      amenities: form.amenities
+        ? form.amenities
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
     };
     const res = await fetch("/api/admin/hotels", {
       method: "POST",
@@ -133,7 +174,7 @@ export default function AdminHotelsPage() {
       resetForm();
     } else {
       const msg = await res.text();
-      alert("Failed: " + msg);
+      alert(`Failed: ${msg}`);
     }
   }
 
@@ -141,7 +182,7 @@ export default function AdminHotelsPage() {
     if (!confirm("Are you sure you want to delete this hotel?")) return;
 
     setDeletingHotelId(hotelId);
-    
+
     try {
       const res = await fetch(`/api/admin/hotels/${hotelId}`, {
         method: "DELETE",
@@ -149,26 +190,30 @@ export default function AdminHotelsPage() {
 
       if (res.ok) {
         // Optimistically update the UI by removing the hotel from the cache
-        mutate("/api/admin/hotels", (data: any) => {
-          if (!data) return data;
-          return {
-            ...data,
-            hotels: data.hotels.filter((hotel: any) => hotel.id !== hotelId)
-          };
-        }, false); // false = don't revalidate immediately, we already have the updated data
-        
+        mutate(
+          "/api/admin/hotels",
+          (data: any) => {
+            if (!data) return data;
+            return {
+              ...data,
+              hotels: data.hotels.filter((hotel: any) => hotel.id !== hotelId),
+            };
+          },
+          false,
+        ); // false = don't revalidate immediately, we already have the updated data
+
         // Then revalidate to ensure consistency
         await mutate("/api/admin/hotels");
-        
+
         // Show success message
         alert("Hotel deleted successfully!");
       } else {
         const msg = await res.text();
-        alert("Delete failed: " + msg);
+        alert(`Delete failed: ${msg}`);
       }
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Delete failed: " + (error as Error).message);
+      alert(`Delete failed: ${(error as Error).message}`);
     } finally {
       setDeletingHotelId(null);
     }
@@ -213,14 +258,28 @@ export default function AdminHotelsPage() {
   async function updateHotel() {
     if (!editingHotel) return;
 
-    if (!form.name.trim()) { alert("Name is required"); return; }
-    if (!form.city.trim()) { alert("City is required"); return; }
+    if (!form.name.trim()) {
+      alert("Name is required");
+      return;
+    }
+    if (!form.city.trim()) {
+      alert("City is required");
+      return;
+    }
 
     const payload = {
       ...form,
-      pricePerNightINR: form.pricePerNightINR ? Number(form.pricePerNightINR) : undefined,
-      rating: form.rating && form.rating !== "0" ? Number(form.rating) : undefined,
-      amenities: form.amenities ? form.amenities.split(",").map((s) => s.trim()).filter(Boolean) : [],
+      pricePerNightINR: form.pricePerNightINR
+        ? Number(form.pricePerNightINR)
+        : undefined,
+      rating:
+        form.rating && form.rating !== "0" ? Number(form.rating) : undefined,
+      amenities: form.amenities
+        ? form.amenities
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
     };
 
     try {
@@ -237,11 +296,11 @@ export default function AdminHotelsPage() {
         alert("Hotel updated successfully!");
       } else {
         const msg = await res.text();
-        alert("Update failed: " + msg);
+        alert(`Update failed: ${msg}`);
       }
     } catch (error) {
       console.error("Update hotel error:", error);
-      alert("Update failed: " + (error as Error).message);
+      alert(`Update failed: ${(error as Error).message}`);
     }
   }
 
@@ -273,7 +332,7 @@ export default function AdminHotelsPage() {
     if (!file) return;
 
     // Validate file type
-    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
       alert("Please upload an Excel file (.xlsx or .xls)");
       return;
     }
@@ -295,18 +354,22 @@ export default function AdminHotelsPage() {
       if (response.ok) {
         setImportResult(`✅ ${data.message}`);
         if (data.results.errors.length > 0) {
-          setImportResult(`${data.message}\n\nErrors:\n${data.results.errors.slice(0, 10).join('\n')}${data.results.errors.length > 10 ? `\n... and ${data.results.errors.length - 10} more errors` : ''}`);
+          setImportResult(
+            `${data.message}\n\nErrors:\n${data.results.errors.slice(0, 10).join("\n")}${data.results.errors.length > 10 ? `\n... and ${data.results.errors.length - 10} more errors` : ""}`,
+          );
         }
         // Refresh the hotels list
         await mutate("/api/admin/hotels");
         // Reset file input
-        event.target.value = '';
+        event.target.value = "";
       } else {
         setImportResult(`❌ Error: ${data.error || "Failed to import hotels"}`);
       }
     } catch (error: any) {
       console.error("Import error:", error);
-      setImportResult(`❌ Error: ${error.message || "Failed to import hotels"}`);
+      setImportResult(
+        `❌ Error: ${error.message || "Failed to import hotels"}`,
+      );
     } finally {
       setUploading(false);
     }
@@ -316,7 +379,9 @@ export default function AdminHotelsPage() {
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-red-600 mb-2">🔒 Admin Panel</h1>
-        <p className="text-lg text-muted-foreground">Manage Hotels - Admin Only</p>
+        <p className="text-lg text-muted-foreground">
+          Manage Hotels - Admin Only
+        </p>
       </div>
 
       {/* Bulk Import Section */}
@@ -352,7 +417,9 @@ export default function AdminHotelsPage() {
                   variant="default"
                   disabled={uploading}
                   className="w-full sm:w-auto flex items-center gap-2"
-                  onClick={() => document.getElementById('excel-upload-hotels')?.click()}
+                  onClick={() =>
+                    document.getElementById("excel-upload-hotels")?.click()
+                  }
                 >
                   <Upload className="w-4 h-4" />
                   {uploading ? "Uploading..." : "Upload Excel File"}
@@ -361,45 +428,70 @@ export default function AdminHotelsPage() {
             </div>
           </div>
           {importResult && (
-            <div className={`p-4 rounded-md ${importResult.startsWith('✅') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+            <div
+              className={`p-4 rounded-md ${importResult.startsWith("✅") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}
+            >
               <pre className="whitespace-pre-wrap text-sm">{importResult}</pre>
             </div>
           )}
           <p className="text-sm text-muted-foreground">
-            Download the template, fill in your hotels data, and upload the Excel file to import multiple hotels at once.
+            Download the template, fill in your hotels data, and upload the
+            Excel file to import multiple hotels at once.
           </p>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
-          <CardTitle>{editingHotel ? "Edit Hotel" : "Add Partner Hotel"}</CardTitle>
+          <CardTitle>
+            {editingHotel ? "Edit Hotel" : "Add Partner Hotel"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Name</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>City</Label>
-              <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+              <Input
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>State</Label>
-              <Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+              <Input
+                value={form.state}
+                onChange={(e) => setForm({ ...form, state: e.target.value })}
+              />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label>Address</Label>
-              <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+              <Input
+                value={form.address}
+                onChange={(e) => setForm({ ...form, address: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Price / Night (₹)</Label>
-              <Input value={form.pricePerNightINR} onChange={(e) => setForm({ ...form, pricePerNightINR: e.target.value })} />
+              <Input
+                value={form.pricePerNightINR}
+                onChange={(e) =>
+                  setForm({ ...form, pricePerNightINR: e.target.value })
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label>Rating</Label>
-              <Select value={form.rating} onValueChange={(value) => setForm({ ...form, rating: value })}>
+              <Select
+                value={form.rating}
+                onValueChange={(value) => setForm({ ...form, rating: value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select rating" />
                 </SelectTrigger>
@@ -415,27 +507,48 @@ export default function AdminHotelsPage() {
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label>Amenities (comma separated)</Label>
-              <Input value={form.amenities} onChange={(e) => setForm({ ...form, amenities: e.target.value })} />
+              <Input
+                value={form.amenities}
+                onChange={(e) =>
+                  setForm({ ...form, amenities: e.target.value })
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label>Google Maps URL</Label>
-              <Input value={form.mapsUrl} onChange={(e) => setForm({ ...form, mapsUrl: e.target.value })} />
+              <Input
+                value={form.mapsUrl}
+                onChange={(e) => setForm({ ...form, mapsUrl: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Website</Label>
-              <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
+              <Input
+                value={form.website}
+                onChange={(e) => setForm({ ...form, website: e.target.value })}
+              />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label>Contact</Label>
-              <Input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} />
+              <Input
+                value={form.contact}
+                onChange={(e) => setForm({ ...form, contact: e.target.value })}
+              />
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={editingHotel ? updateHotel : addHotel} className="flex-1 btn-hover-enhanced">
+            <Button
+              onClick={editingHotel ? updateHotel : addHotel}
+              className="flex-1 btn-hover-enhanced"
+            >
               {editingHotel ? "Update Hotel" : "Add Hotel"}
             </Button>
             {editingHotel && (
-              <Button variant="outline" onClick={cancelEdit} className="btn-hover-enhanced">
+              <Button
+                variant="outline"
+                onClick={cancelEdit}
+                className="btn-hover-enhanced"
+              >
                 Cancel
               </Button>
             )}
@@ -448,9 +561,13 @@ export default function AdminHotelsPage() {
           <CardTitle>Partner Hotels</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading && <div className="text-sm text-muted-foreground">Loading…</div>}
+          {isLoading && (
+            <div className="text-sm text-muted-foreground">Loading…</div>
+          )}
           {!isLoading && hotels.length === 0 && (
-            <div className="text-sm text-muted-foreground">No hotels added yet.</div>
+            <div className="text-sm text-muted-foreground">
+              No hotels added yet.
+            </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {hotels.map((h: any) => (
@@ -460,16 +577,25 @@ export default function AdminHotelsPage() {
                   <Input
                     value={h._editCity ?? h.city ?? ""}
                     onChange={(e) => {
-                      const next = (data?.hotels || []).map((x: any) => x.id === h.id ? { ...x, _editCity: e.target.value } : x);
+                      const next = (data?.hotels || []).map((x: any) =>
+                        x.id === h.id ? { ...x, _editCity: e.target.value } : x,
+                      );
                       // Optimistic local mutate
-                      mutate("/api/admin/hotels", { hotels: next }, { revalidate: false });
+                      mutate(
+                        "/api/admin/hotels",
+                        { hotels: next },
+                        { revalidate: false },
+                      );
                     }}
                   />
                   <Button
                     variant="secondary"
                     onClick={async () => {
                       const newCity = (h._editCity ?? h.city ?? "").trim();
-                      if (!newCity) { alert("City is required"); return; }
+                      if (!newCity) {
+                        alert("City is required");
+                        return;
+                      }
                       const res = await fetch(`/api/admin/hotels/${h.id}`, {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
@@ -479,34 +605,47 @@ export default function AdminHotelsPage() {
                         await mutate("/api/admin/hotels");
                       } else {
                         const msg = await res.text();
-                        alert("Update failed: " + msg);
+                        alert(`Update failed: ${msg}`);
                       }
                     }}
-                  >Save City</Button>
+                  >
+                    Save City
+                  </Button>
                 </div>
-                <div className="text-xs text-muted-foreground">{h.state ? h.state : null}</div>
+                <div className="text-xs text-muted-foreground">
+                  {h.state ? h.state : null}
+                </div>
                 {h.rating && (
+                  <div className="mt-1">{renderStarRating(h.rating)}</div>
+                )}
+                {h.pricePerNightINR && (
                   <div className="mt-1">
-                    {renderStarRating(h.rating)}
+                    ₹{h.pricePerNightINR.toLocaleString?.()}
                   </div>
                 )}
-                {h.pricePerNightINR && <div className="mt-1">₹{h.pricePerNightINR.toLocaleString?.()}</div>}
                 {h.mapsUrl && (
                   <div className="mt-2">
-                    <a className="text-blue-600 underline" href={h.mapsUrl} target="_blank" rel="noreferrer">Maps</a>
+                    <a
+                      className="text-blue-600 underline"
+                      href={h.mapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Maps
+                    </a>
                   </div>
                 )}
                 <div className="mt-2 flex justify-end gap-1">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => startEdit(h)}
                   >
                     <Edit className="w-3 h-3" />
                   </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => deleteHotel(h.id)}
                     disabled={deletingHotelId === h.id}
                     className="text-red-600 hover:text-red-700"
@@ -526,5 +665,3 @@ export default function AdminHotelsPage() {
     </div>
   );
 }
-
-

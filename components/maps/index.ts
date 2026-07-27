@@ -1,26 +1,26 @@
 // Export all map-related components and utilities
-export { MapButton, MapLink } from './map-button';
-export { TripMap, QuickMap } from './trip-map';
-export { MapPreview, LocationPreview, MapGrid } from './map-preview';
-export { DirectionsPanel, QuickDirections } from './directions-panel';
-export { MapsIntegrationSummary, MapStats } from './maps-integration-summary';
 
 // Re-export utility functions from lib/maps
 export {
-  generateMapsSearchUrl,
-  generateMapsDirectionsUrl,
-  generateMapsPlaceUrl,
-  generateMapsCoordinatesUrl,
-  generateMapsMultiStopRoute,
-  generateStreetViewUrl,
-  generateMapsEmbedUrl,
-  generateLocationQuery,
-  openInMaps,
-  generateMyMapsUrl,
-  generateMapsShareUrl,
-  isValidMapsUrl,
   extractPlaceIdFromUrl,
   generateLocationMapsData,
+  generateLocationQuery,
+  generateMapsCoordinatesUrl,
+  generateMapsDirectionsUrl,
+  generateMapsEmbedUrl,
+  generateMapsMultiStopRoute,
+  generateMapsPlaceUrl,
+  generateMapsSearchUrl,
+  generateMapsShareUrl,
+  generateMyMapsUrl,
+  generateStreetViewUrl,
   generateTripRoute,
-  type MapLocation
-} from '@/lib/maps';
+  isValidMapsUrl,
+  type MapLocation,
+  openInMaps,
+} from "@/lib/maps";
+export { DirectionsPanel, QuickDirections } from "./directions-panel";
+export { MapButton, MapLink } from "./map-button";
+export { LocationPreview, MapGrid, MapPreview } from "./map-preview";
+export { MapStats, MapsIntegrationSummary } from "./maps-integration-summary";
+export { QuickMap, TripMap } from "./trip-map";

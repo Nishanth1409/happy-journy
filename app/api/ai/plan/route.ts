@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import { getAdminDb } from "@/lib/firebaseAdmin";
 import { getGenerativeModel } from "@/lib/gemini";
 import { getGroqClient, getGroqModel } from "@/lib/groq";
-import { getAdminDb } from "@/lib/firebaseAdmin";
-import { generateMapsSearchUrl, generateLocationQuery, generateTripRoute } from "@/lib/maps";
 import { validatePlacesInIndia } from "@/lib/placeValidator";
 
 export const runtime = "nodejs";
@@ -11,12 +10,12 @@ export const maxDuration = 60;
 
 function sanitizeJsonCandidate(candidate: string) {
   // Strip code fences and labels
-  let txt = candidate
-    .replace(/^```[a-zA-Z]*\s*/g, "")
-    .replace(/```\s*$/g, "");
+  let txt = candidate.replace(/^```[a-zA-Z]*\s*/g, "").replace(/```\s*$/g, "");
 
   // Normalize quotes (smart quotes → straight)
-  txt = txt.replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"').replace(/[\u2018\u2019\u201B]/g, "'");
+  txt = txt
+    .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+    .replace(/[\u2018\u2019\u201B]/g, "'");
 
   // Remove trailing commas before } or ]
   txt = txt.replace(/,(\s*[}\]])/g, "$1");
@@ -34,7 +33,9 @@ function extractJson(text: string) {
   };
 
   // First, remove fences from the whole text
-  const stripped = text.replace(/^```[a-zA-Z]*\s*/g, "").replace(/```\s*$/g, "");
+  const stripped = text
+    .replace(/^```[a-zA-Z]*\s*/g, "")
+    .replace(/```\s*$/g, "");
   const direct = tryParse(sanitizeJsonCandidate(stripped));
   if (direct) return direct;
 
@@ -51,12 +52,13 @@ function extractJson(text: string) {
 
 export async function POST(request: Request) {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!userId)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { 
-    places, 
-    days, 
-    travelers, 
+  const {
+    places,
+    days,
+    travelers,
     budget,
     travelStyle = "balanced",
     accommodationType = "hotel",
@@ -70,9 +72,9 @@ export async function POST(request: Request) {
     accessibility = [],
     startDate,
     endDate,
-    specialRequests
+    specialRequests,
   } = await request.json();
-  
+
   if (!places || places.length === 0) {
     return NextResponse.json({ error: "Missing places" }, { status: 400 });
   }
@@ -81,110 +83,183 @@ export async function POST(request: Request) {
   const validation = await validatePlacesInIndia(places);
   if (!validation.valid) {
     return NextResponse.json(
-      { 
+      {
         error: validation.message || "Please provide places within India",
-        invalidPlaces: validation.invalidPlaces
+        invalidPlaces: validation.invalidPlaces,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   const placesList = Array.isArray(places) ? places.join(", ") : places;
-  const interestsList = Array.isArray(interests) ? interests.join(", ") : interests.join(", ");
-  const dietaryList = Array.isArray(dietaryRestrictions) ? dietaryRestrictions.join(", ") : dietaryRestrictions.join(", ");
-  const accessibilityList = Array.isArray(accessibility) ? accessibility.join(", ") : accessibility.join(", ");
+  const interestsList = Array.isArray(interests)
+    ? interests.join(", ")
+    : interests.join(", ");
+  const dietaryList = Array.isArray(dietaryRestrictions)
+    ? dietaryRestrictions.join(", ")
+    : dietaryRestrictions.join(", ");
+  const accessibilityList = Array.isArray(accessibility)
+    ? accessibility.join(", ")
+    : accessibility.join(", ");
 
   // Calculate accurate budget based on all factors
   let calculatedBudget = budget;
   let budgetBreakdown = null;
   let vehicleCostInfo = "";
-  
+
   if (!budget) {
     // Auto-calculate budget based on all factors
     const calculatedDays = days || Math.max(3, places.length); // Minimum 3 days or based on destinations
     const calculatedTravelers = travelers || 2; // Default 2 travelers
-    
+
     // Base budget per person per day based on travel style
     let baseBudgetPerPersonPerDay = 0;
     switch (travelStyle) {
-      case "budget": baseBudgetPerPersonPerDay = 1500; break;
-      case "balanced": baseBudgetPerPersonPerDay = 2500; break;
-      case "luxury": baseBudgetPerPersonPerDay = 5000; break;
-      case "adventure": baseBudgetPerPersonPerDay = 3000; break;
-      default: baseBudgetPerPersonPerDay = 2500;
+      case "budget":
+        baseBudgetPerPersonPerDay = 1500;
+        break;
+      case "balanced":
+        baseBudgetPerPersonPerDay = 2500;
+        break;
+      case "luxury":
+        baseBudgetPerPersonPerDay = 5000;
+        break;
+      case "adventure":
+        baseBudgetPerPersonPerDay = 3000;
+        break;
+      default:
+        baseBudgetPerPersonPerDay = 2500;
     }
-    
+
     // Calculate base budget
-    const baseBudget = baseBudgetPerPersonPerDay * calculatedDays * calculatedTravelers;
-    
+    const _baseBudget =
+      baseBudgetPerPersonPerDay * calculatedDays * calculatedTravelers;
+
     // Calculate accommodation cost
     let accommodationCost = 0;
     if (accommodationType !== "na") {
       let accommodationPerNight = 0;
       switch (accommodationType) {
-        case "budget-hotel": accommodationPerNight = 1500; break;
-        case "hotel": accommodationPerNight = 3000; break;
-        case "boutique": accommodationPerNight = 5000; break;
-        case "resort": accommodationPerNight = 8000; break;
-        case "homestay": accommodationPerNight = 2000; break;
-        default: accommodationPerNight = 3000;
+        case "budget-hotel":
+          accommodationPerNight = 1500;
+          break;
+        case "hotel":
+          accommodationPerNight = 3000;
+          break;
+        case "boutique":
+          accommodationPerNight = 5000;
+          break;
+        case "resort":
+          accommodationPerNight = 8000;
+          break;
+        case "homestay":
+          accommodationPerNight = 2000;
+          break;
+        default:
+          accommodationPerNight = 3000;
       }
       accommodationCost = accommodationPerNight * calculatedDays;
     }
-    
+
     // Calculate transportation cost
     let transportationCost = 0;
-    if (transportationType === "own-vehicle" && vehicleType && vehicleMileage && fuelType && fuelCostPerLiter) {
+    if (
+      transportationType === "own-vehicle" &&
+      vehicleType &&
+      vehicleMileage &&
+      fuelType &&
+      fuelCostPerLiter
+    ) {
       // Calculate fuel cost based on vehicle details
       const fuelCost = parseFloat(fuelCostPerLiter);
       const mileage = parseFloat(vehicleMileage);
       const estimatedDistance = calculatedDays * 200; // Average 200km per day
       const fuelNeeded = estimatedDistance / mileage;
       transportationCost = Math.round(fuelNeeded * fuelCost);
-      
+
       vehicleCostInfo = `\nVehicle Details: ${vehicleType}, ${vehicleMileage} km/liter, ${fuelType}\nFuel Cost: ₹${fuelCost}/liter\nEstimated Distance: ${estimatedDistance}km\nTotal Fuel Cost: ₹${transportationCost.toLocaleString()}`;
     } else if (transportationType !== "na") {
       // Calculate transportation cost based on type
       let transportPerPersonPerDay = 0;
       switch (transportationType) {
-        case "train": transportPerPersonPerDay = 500; break;
-        case "bus": transportPerPersonPerDay = 300; break;
-        case "car": transportPerPersonPerDay = 2000; break;
-        case "flight": transportPerPersonPerDay = 3000; break;
-        case "mix": transportPerPersonPerDay = 1000; break;
-        default: transportPerPersonPerDay = 1000;
+        case "train":
+          transportPerPersonPerDay = 500;
+          break;
+        case "bus":
+          transportPerPersonPerDay = 300;
+          break;
+        case "car":
+          transportPerPersonPerDay = 2000;
+          break;
+        case "flight":
+          transportPerPersonPerDay = 3000;
+          break;
+        case "mix":
+          transportPerPersonPerDay = 1000;
+          break;
+        default:
+          transportPerPersonPerDay = 1000;
       }
-      transportationCost = transportPerPersonPerDay * calculatedDays * calculatedTravelers;
+      transportationCost =
+        transportPerPersonPerDay * calculatedDays * calculatedTravelers;
     }
-    
+
     // Calculate food cost
     let foodCostPerPersonPerDay = 0;
     switch (travelStyle) {
-      case "budget": foodCostPerPersonPerDay = 500; break;
-      case "balanced": foodCostPerPersonPerDay = 800; break;
-      case "luxury": foodCostPerPersonPerDay = 2000; break;
-      case "adventure": foodCostPerPersonPerDay = 1000; break;
-      default: foodCostPerPersonPerDay = 800;
+      case "budget":
+        foodCostPerPersonPerDay = 500;
+        break;
+      case "balanced":
+        foodCostPerPersonPerDay = 800;
+        break;
+      case "luxury":
+        foodCostPerPersonPerDay = 2000;
+        break;
+      case "adventure":
+        foodCostPerPersonPerDay = 1000;
+        break;
+      default:
+        foodCostPerPersonPerDay = 800;
     }
-    const foodCost = foodCostPerPersonPerDay * calculatedDays * calculatedTravelers;
-    
+    const foodCost =
+      foodCostPerPersonPerDay * calculatedDays * calculatedTravelers;
+
     // Calculate attractions cost
     let attractionsCostPerPersonPerDay = 0;
     switch (travelStyle) {
-      case "budget": attractionsCostPerPersonPerDay = 300; break;
-      case "balanced": attractionsCostPerPersonPerDay = 600; break;
-      case "luxury": attractionsCostPerPersonPerDay = 1500; break;
-      case "adventure": attractionsCostPerPersonPerDay = 1000; break;
-      default: attractionsCostPerPersonPerDay = 600;
+      case "budget":
+        attractionsCostPerPersonPerDay = 300;
+        break;
+      case "balanced":
+        attractionsCostPerPersonPerDay = 600;
+        break;
+      case "luxury":
+        attractionsCostPerPersonPerDay = 1500;
+        break;
+      case "adventure":
+        attractionsCostPerPersonPerDay = 1000;
+        break;
+      default:
+        attractionsCostPerPersonPerDay = 600;
     }
-    const attractionsCost = attractionsCostPerPersonPerDay * calculatedDays * calculatedTravelers;
-    
+    const attractionsCost =
+      attractionsCostPerPersonPerDay * calculatedDays * calculatedTravelers;
+
     // Calculate miscellaneous cost (10% of total)
-    const miscellaneousCost = Math.round((accommodationCost + transportationCost + foodCost + attractionsCost) * 0.1);
-    
+    const miscellaneousCost = Math.round(
+      (accommodationCost + transportationCost + foodCost + attractionsCost) *
+        0.1,
+    );
+
     // Total calculated budget
-    calculatedBudget = accommodationCost + transportationCost + foodCost + attractionsCost + miscellaneousCost;
-    
+    calculatedBudget =
+      accommodationCost +
+      transportationCost +
+      foodCost +
+      attractionsCost +
+      miscellaneousCost;
+
     // Create budget breakdown
     budgetBreakdown = {
       accommodation: accommodationCost,
@@ -192,7 +267,7 @@ export async function POST(request: Request) {
       food: foodCost,
       attractions: attractionsCost,
       miscellaneous: miscellaneousCost,
-      total: calculatedBudget
+      total: calculatedBudget,
     };
   }
 
@@ -206,35 +281,51 @@ Accommodation: ${accommodationType === "na" ? "Not needed" : accommodationType}
 Transportation: ${transportationType === "na" ? "Not needed" : transportationType}${vehicleCostInfo}
 
 CRITICAL USER PREFERENCES ANALYSIS:
-${interestsList ? `🎯 INTERESTS & ACTIVITIES: ${interestsList}
+${
+  interestsList
+    ? `🎯 INTERESTS & ACTIVITIES: ${interestsList}
 - Prioritize activities that match these interests
 - Include specific recommendations for each interest category
-- Highlight how each activity relates to user interests` : "🎯 INTERESTS: General sightseeing"}
+- Highlight how each activity relates to user interests`
+    : "🎯 INTERESTS: General sightseeing"
+}
 
-${dietaryList ? `🍽️ DIETARY RESTRICTIONS: ${dietaryList}
+${
+  dietaryList
+    ? `🍽️ DIETARY RESTRICTIONS: ${dietaryList}
 - CRITICAL: All restaurant recommendations MUST accommodate these dietary needs
 - Include specific dietary-friendly restaurants and food options
 - Mention dietary considerations for each meal suggestion
-- Provide alternatives for restricted foods` : "🍽️ DIETARY: No restrictions"}
+- Provide alternatives for restricted foods`
+    : "🍽️ DIETARY: No restrictions"
+}
 
-${accessibilityList ? `♿ ACCESSIBILITY REQUIREMENTS: ${accessibilityList}
+${
+  accessibilityList
+    ? `♿ ACCESSIBILITY REQUIREMENTS: ${accessibilityList}
 - CRITICAL: All activities, accommodations, and transportation must be accessible
 - Include wheelchair-accessible venues and routes
 - Provide accessibility information for each location
 - Suggest accessible alternatives when needed
-- Include accessibility tips and considerations` : "♿ ACCESSIBILITY: No special requirements"}
+- Include accessibility tips and considerations`
+    : "♿ ACCESSIBILITY: No special requirements"
+}
 
 ${startDate ? `Start Date: ${startDate}` : ""}
 ${endDate ? `End Date: ${endDate}` : ""}
 ${specialRequests ? `Special Requests: ${specialRequests}` : ""}
 
-${budgetBreakdown ? `CALCULATED BUDGET BREAKDOWN:
+${
+  budgetBreakdown
+    ? `CALCULATED BUDGET BREAKDOWN:
 - Accommodation: ₹${budgetBreakdown.accommodation.toLocaleString()}
 - Transportation: ₹${budgetBreakdown.transportation.toLocaleString()}
 - Food: ₹${budgetBreakdown.food.toLocaleString()}
 - Attractions: ₹${budgetBreakdown.attractions.toLocaleString()}
 - Miscellaneous: ₹${budgetBreakdown.miscellaneous.toLocaleString()}
-- Total: ₹${budgetBreakdown.total.toLocaleString()}` : ""}
+- Total: ₹${budgetBreakdown.total.toLocaleString()}`
+    : ""
+}
 
 Return JSON with this exact schema:
 {
@@ -406,7 +497,11 @@ GENERAL REQUIREMENTS:
       const chat = await groq.chat.completions.create({
         model,
         messages: [
-          { role: "system", content: "You are a helpful travel planner that outputs only JSON per the user's schema." },
+          {
+            role: "system",
+            content:
+              "You are a helpful travel planner that outputs only JSON per the user's schema.",
+          },
           { role: "user", content: prompt },
         ],
         temperature: 0.7,
@@ -414,24 +509,32 @@ GENERAL REQUIREMENTS:
       text = chat.choices?.[0]?.message?.content || "";
     } else {
       if (!process.env.GEMINI_API_KEY) {
-        return NextResponse.json({ error: "Missing GROQ_API_KEY or GEMINI_API_KEY" }, { status: 500 });
+        return NextResponse.json(
+          { error: "Missing GROQ_API_KEY or GEMINI_API_KEY" },
+          { status: 500 },
+        );
       }
       const model = getGenerativeModel();
-      const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: prompt }] }] });
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      });
       text = result.response.text();
     }
 
     const parsed = extractJson(text);
     if (!parsed?.roadmap || !parsed?.accommodations || !parsed?.attractions) {
       console.error("AI invalid JSON (plan)", text);
-      return NextResponse.json({ error: "AI returned invalid JSON", raw: text }, { status: 502 });
+      return NextResponse.json(
+        { error: "AI returned invalid JSON", raw: text },
+        { status: 502 },
+      );
     }
 
     const db = getAdminDb();
-    const input: any = { 
-      places, 
-      days, 
-      travelers, 
+    const input: any = {
+      places,
+      days,
+      travelers,
       budget,
       travelStyle,
       accommodationType,
@@ -447,9 +550,9 @@ GENERAL REQUIREMENTS:
       endDate,
       specialRequests,
       calculatedBudget,
-      budgetBreakdown
+      budgetBreakdown,
     };
-    
+
     const doc = await db.collection("trips").add({
       userId,
       type: "plan",
@@ -461,8 +564,9 @@ GENERAL REQUIREMENTS:
     return NextResponse.json({ id: doc.id, plan: parsed });
   } catch (err: any) {
     console.error("Plan generation failed", err);
-    return NextResponse.json({ error: "Generation failed", details: String(err?.message || err) }, { status: 500 });
+    return NextResponse.json(
+      { error: "Generation failed", details: String(err?.message || err) },
+      { status: 500 },
+    );
   }
 }
-
-

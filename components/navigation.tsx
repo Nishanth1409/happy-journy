@@ -1,39 +1,41 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import {
   RiArrowRightSLine,
-  RiFileTextLine,
-  RiHomeLine,
-  RiEditLine,
+  RiCalendarLine,
   RiCheckLine,
   RiCloseLine,
+  RiEditLine,
+  RiFileTextLine,
+  RiHomeLine,
+  RiMapPinFill,
+  RiSettingsLine,
 } from "@remixicon/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useGeolocation } from "@/components/maps/use-geolocation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import { RiMapPinFill } from "@remixicon/react";
-import { useGeolocation } from "@/components/maps/use-geolocation";
-import { useAuth } from "@clerk/nextjs";
-import { RiSettingsLine, RiCalendarLine } from "@remixicon/react";
+
 // Simple scroll visibility hook
 function useScrollVisibility() {
   const [isVisible, setIsVisible] = useState(true);
-  
+
   useEffect(() => {
     let lastScrollY = window.scrollY;
-    
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setIsVisible(currentScrollY < lastScrollY || currentScrollY < 10);
       lastScrollY = currentScrollY;
     };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  
+
   return isVisible;
 }
 
@@ -47,17 +49,21 @@ export default function Navigation() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const { status: geoStatus, location, error: geoError, request } = useGeolocation();
+  const {
+    status: geoStatus,
+    location,
+    error: geoError,
+    request,
+  } = useGeolocation();
   const [navCity, setNavCity] = useState<string | null>(null);
   const isHeaderVisible = useScrollVisibility();
-  
+
   // Export navCity to window so home can read it as a last resort
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // @ts-ignore
-      window.__NAV_CITY__ = navCity;
+    if (typeof window !== "undefined") {
+      (window as any).__NAV_CITY__ = navCity;
       try {
-        window.dispatchEvent(new CustomEvent('nav-city', { detail: navCity }));
+        window.dispatchEvent(new CustomEvent("nav-city", { detail: navCity }));
       } catch {}
     }
   }, [navCity]);
@@ -70,7 +76,7 @@ export default function Navigation() {
       setDocumentId(docId);
       // For now, use a generic title - you can enhance this later with Firebase
       setDocumentTitle("Document");
-      setCanEdit(userId ? true : false);
+      setCanEdit(!!userId);
     } else {
       setDocumentTitle(null);
       setDocumentId(null);
@@ -81,7 +87,7 @@ export default function Navigation() {
   // Auto request location on mount
   useEffect(() => {
     request();
-  }, []);
+  }, [request]);
 
   // Check if user is admin
   useEffect(() => {
@@ -90,7 +96,7 @@ export default function Navigation() {
         setIsAdmin(false);
         return;
       }
-      
+
       try {
         // Test admin access by trying to fetch admin data
         const response = await fetch("/api/admin/events");
@@ -99,7 +105,7 @@ export default function Navigation() {
         setIsAdmin(false);
       }
     }
-    
+
     checkAdminStatus();
   }, [userId]);
 
@@ -108,9 +114,14 @@ export default function Navigation() {
     async function run() {
       try {
         if (location) {
-          const res = await fetch(`/api/geo/reverse?lat=${location.lat}&lng=${location.lng}`);
+          const res = await fetch(
+            `/api/geo/reverse?lat=${location.lat}&lng=${location.lng}`,
+          );
           const data = await res.json();
-          if (res.ok) { setNavCity(data.city || data.state || null); return; }
+          if (res.ok) {
+            setNavCity(data.city || data.state || null);
+            return;
+          }
         }
         // If no GPS, approximate via client IP
         if (!location) {
@@ -123,7 +134,7 @@ export default function Navigation() {
       } catch {}
     }
     run();
-  }, [location?.lat, location?.lng]);
+  }, [location?.lat, location?.lng, location]);
 
   const handleEditClick = () => {
     if (!documentTitle || !documentId) return;
@@ -139,7 +150,7 @@ export default function Navigation() {
       // Simplified save - you can enhance this with Firebase later
       setDocumentTitle(editTitle.trim());
       setIsEditing(false);
-      
+
       // Optional: Add your Firebase update logic here
       // const response = await fetch(`/api/documents/${documentId}`, {
       //   method: "PATCH",
@@ -170,21 +181,29 @@ export default function Navigation() {
       const path = `/${segments.slice(0, i + 1).join("/")}`;
 
       if (segment === "dashboard") {
-        breadcrumbs.push({ label: "Dashboard", path, icon: null, editable: false });
+        breadcrumbs.push({
+          label: "Dashboard",
+          path,
+          icon: null,
+          editable: false,
+        });
       } else if (segment === "docs") {
-        // Skip adding "Documents" as a separate breadcrumb
-        continue;
       } else if (segment === "new") {
-        breadcrumbs.push({ label: "New Document", path, icon: null, editable: false });
+        breadcrumbs.push({
+          label: "New Document",
+          path,
+          icon: null,
+          editable: false,
+        });
       } else if (segment !== "[id]" && segment.length > 0) {
         // This is likely a document ID - use the fetched title or fallback
         const title = documentTitle || "Document";
-        breadcrumbs.push({ 
-          label: title, 
-          path, 
-          icon: RiFileTextLine, 
+        breadcrumbs.push({
+          label: title,
+          path,
+          icon: RiFileTextLine,
           editable: true,
-          isDocument: true 
+          isDocument: true,
         });
       }
     }
@@ -195,9 +214,11 @@ export default function Navigation() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <nav className={`fixed top-12 sm:top-16 md:top-18 left-0 right-0 z-40 flex items-center justify-between text-xs sm:text-sm text-muted-foreground px-1 sm:px-2 md:px-4 py-1 sm:py-2 glass-navigation backdrop-blur-glass transition-transform duration-300 ${
-      isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-    }`}>
+    <nav
+      className={`fixed top-12 sm:top-16 md:top-18 left-0 right-0 z-40 flex items-center justify-between text-xs sm:text-sm text-muted-foreground px-1 sm:px-2 md:px-4 py-1 sm:py-2 glass-navigation backdrop-blur-glass transition-transform duration-300 ${
+        isHeaderVisible ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <div className="flex items-center space-x-1 min-w-0 flex-1">
         <Button variant="ghost" size="sm" asChild className="touch-target">
           <Link href="/">
@@ -206,81 +227,83 @@ export default function Navigation() {
         </Button>
 
         {breadcrumbs.map((breadcrumb, index) => (
-        <div key={breadcrumb.path} className="flex items-center min-w-0">
-          <RiArrowRightSLine className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
-          {index === breadcrumbs.length - 1 ? (
-            <span className="font-medium text-foreground flex items-center gap-1 sm:gap-2 group min-w-0">
-              {breadcrumb.icon && (
-                <breadcrumb.icon className="h-3 w-3 sm:h-4 sm:w-4 inline flex-shrink-0" />
-              )}
-              {breadcrumb.editable && breadcrumb.isDocument && isEditing ? (
-                <div className="flex items-center gap-1 min-w-0">
-                  <Input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="h-6 text-xs sm:text-sm w-24 sm:w-32 md:w-48 touch-target"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSaveTitle();
-                      } else if (e.key === "Escape") {
-                        handleCancelEdit();
-                      }
-                    }}
-                    autoFocus
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleSaveTitle}
-                    disabled={isUpdating}
-                    className="h-6 w-6 p-0 flex-shrink-0 touch-target"
-                    title="Save changes"
-                  >
-                    {isUpdating ? (
-                      <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
-                    ) : (
-                      <RiCheckLine className="h-3 w-3" />
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleCancelEdit}
-                    disabled={isUpdating}
-                    className="h-6 w-6 p-0 flex-shrink-0 touch-target"
-                    title="Cancel editing"
-                  >
-                    <RiCloseLine className="h-3 w-3" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 min-w-0">
-                  <span className="truncate">{breadcrumb.label}</span>
-                  {breadcrumb.editable && breadcrumb.isDocument && canEdit && (
+          <div key={breadcrumb.path} className="flex items-center min-w-0">
+            <RiArrowRightSLine className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
+            {index === breadcrumbs.length - 1 ? (
+              <span className="font-medium text-foreground flex items-center gap-1 sm:gap-2 group min-w-0">
+                {breadcrumb.icon && (
+                  <breadcrumb.icon className="h-3 w-3 sm:h-4 sm:w-4 inline flex-shrink-0" />
+                )}
+                {breadcrumb.editable && breadcrumb.isDocument && isEditing ? (
+                  <div className="flex items-center gap-1 min-w-0">
+                    <Input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="h-6 text-xs sm:text-sm w-24 sm:w-32 md:w-48 touch-target"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSaveTitle();
+                        } else if (e.key === "Escape") {
+                          handleCancelEdit();
+                        }
+                      }}
+                      autoFocus
+                    />
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={handleEditClick}
-                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                      title="Edit document title"
+                      onClick={handleSaveTitle}
+                      disabled={isUpdating}
+                      className="h-6 w-6 p-0 flex-shrink-0 touch-target"
+                      title="Save changes"
                     >
-                      <RiEditLine className="h-3 w-3" />
+                      {isUpdating ? (
+                        <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                      ) : (
+                        <RiCheckLine className="h-3 w-3" />
+                      )}
                     </Button>
-                  )}
-                </div>
-              )}
-            </span>
-          ) : (
-            <Button variant="ghost" size="sm" asChild className="min-w-0">
-              <Link href={breadcrumb.path}>
-                {breadcrumb.icon && (
-                  <breadcrumb.icon className="h-4 w-4 mr-1 flex-shrink-0" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleCancelEdit}
+                      disabled={isUpdating}
+                      className="h-6 w-6 p-0 flex-shrink-0 touch-target"
+                      title="Cancel editing"
+                    >
+                      <RiCloseLine className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 min-w-0">
+                    <span className="truncate">{breadcrumb.label}</span>
+                    {breadcrumb.editable &&
+                      breadcrumb.isDocument &&
+                      canEdit && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleEditClick}
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                          title="Edit document title"
+                        >
+                          <RiEditLine className="h-3 w-3" />
+                        </Button>
+                      )}
+                  </div>
                 )}
-                <span className="truncate">{breadcrumb.label}</span>
-              </Link>
-            </Button>
-          )}
-        </div>
+              </span>
+            ) : (
+              <Button variant="ghost" size="sm" asChild className="min-w-0">
+                <Link href={breadcrumb.path}>
+                  {breadcrumb.icon && (
+                    <breadcrumb.icon className="h-4 w-4 mr-1 flex-shrink-0" />
+                  )}
+                  <span className="truncate">{breadcrumb.label}</span>
+                </Link>
+              </Button>
+            )}
+          </div>
         ))}
       </div>
 
@@ -301,11 +324,14 @@ export default function Navigation() {
             </Button>
           </div>
         )}
-        
+
         <div className="flex items-center gap-1 sm:gap-2">
           <RiMapPinFill className="h-4 w-4 text-foreground flex-shrink-0" />
           <span className="text-foreground text-xs sm:text-sm truncate max-w-24 sm:max-w-none">
-            {navCity || (geoStatus === "granted" ? "Locating..." : "Detecting location...")}
+            {navCity ||
+              (geoStatus === "granted"
+                ? "Locating..."
+                : "Detecting location...")}
           </span>
         </div>
       </div>

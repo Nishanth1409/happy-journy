@@ -1,17 +1,8 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
 import "./globals.css";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { ChatDock } from "@/components/ui";
-import { ThemeLogo } from "@/components/ui/theme-logo";
 import { ScrollableHeader } from "../components/scrollable-header";
 
 const geistSans = Geist({
@@ -30,12 +21,20 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/logoDark.png", media: "(prefers-color-scheme: dark)", type: "image/png", sizes: "32x32" },
-      { url: "/logowhite.png", media: "(prefers-color-scheme: light)", type: "image/png", sizes: "32x32" }
+      {
+        url: "/logoDark.png",
+        media: "(prefers-color-scheme: dark)",
+        type: "image/png",
+        sizes: "32x32",
+      },
+      {
+        url: "/logowhite.png",
+        media: "(prefers-color-scheme: light)",
+        type: "image/png",
+        sizes: "32x32",
+      },
     ],
-    apple: [
-      { url: "/logoDark.png", type: "image/png", sizes: "180x180" }
-    ],
+    apple: [{ url: "/logoDark.png", type: "image/png", sizes: "180x180" }],
     shortcut: "/favicon.ico",
   },
 };
@@ -46,6 +45,9 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
 };
+
+// Auth (Clerk) pages must not statically prerender with placeholder CI keys.
+export const dynamic = "force-dynamic";
 
 export default function RootLayout({
   children,
@@ -60,9 +62,7 @@ export default function RootLayout({
           suppressHydrationWarning={true}
         >
           <ScrollableHeader />
-          <div className="pt-16 sm:pt-20 md:pt-24">
-            {children}
-          </div>
+          <div className="pt-16 sm:pt-20 md:pt-24">{children}</div>
           <ChatDock />
         </body>
       </html>

@@ -1,19 +1,22 @@
 import { NextResponse } from "next/server";
+import * as XLSX from "xlsx";
 import { ensureAdmin } from "@/lib/admin";
 import { getAdminDb } from "@/lib/firebaseAdmin";
-import * as XLSX from "xlsx";
 
 export async function POST(request: Request) {
   const { isAdmin, userEmail, userId } = await ensureAdmin();
-  
+
   if (!isAdmin) {
-    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Admin access required" },
+      { status: 403 },
+    );
   }
 
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    
+
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
@@ -26,7 +29,10 @@ export async function POST(request: Request) {
     const data = XLSX.utils.sheet_to_json(worksheet);
 
     if (!Array.isArray(data) || data.length === 0) {
-      return NextResponse.json({ error: "Excel file is empty or invalid" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Excel file is empty or invalid" },
+        { status: 400 },
+      );
     }
 
     const db = getAdminDb();
@@ -41,13 +47,15 @@ export async function POST(request: Request) {
       const row = data[i] as any;
       try {
         // Map Excel columns to hotel fields
-        const name = row["Name"] || row["name"] || row["Hotel Name"] || "";
-        const city = row["City"] || row["city"] || "";
-        
+        const name = row.Name || row.name || row["Hotel Name"] || "";
+        const city = row.City || row.city || "";
+
         // Validate required fields
         if (!name || !city) {
           results.failed++;
-          results.errors.push(`Row ${i + 2}: Missing required fields (Name, City)`);
+          results.errors.push(
+            `Row ${i + 2}: Missing required fields (Name, City)`,
+          );
           continue;
         }
 
@@ -56,15 +64,29 @@ export async function POST(request: Request) {
           name: String(name).trim(),
           city: String(city).trim(),
           cityLower: String(city).trim().toLowerCase(),
-          state: row["State"] || row["state"] || null,
-          address: row["Address"] || row["address"] || null,
+          state: row.State || row.state || null,
+          address: row.Address || row.address || null,
           location: { latitude: null, longitude: null },
-          pricePerNightINR: row["Price Per Night"] || row["pricePerNight"] || row["PricePerNight"] ? Number(row["Price Per Night"] || row["pricePerNight"] || row["PricePerNight"]) : null,
-          rating: row["Rating"] || row["rating"] ? Number(row["Rating"] || row["rating"]) : null,
-          amenities: row["Amenities"] || row["amenities"] ? String(row["Amenities"] || row["amenities"]).split(",").map((a: string) => a.trim()).filter(Boolean) : [],
-          mapsUrl: row["Maps URL"] || row["mapsUrl"] || row["MapsUrl"] || null,
-          website: row["Website"] || row["website"] || null,
-          contact: row["Contact"] || row["contact"] || null,
+          pricePerNightINR:
+            row["Price Per Night"] || row.pricePerNight || row.PricePerNight
+              ? Number(
+                  row["Price Per Night"] ||
+                    row.pricePerNight ||
+                    row.PricePerNight,
+                )
+              : null,
+          rating:
+            row.Rating || row.rating ? Number(row.Rating || row.rating) : null,
+          amenities:
+            row.Amenities || row.amenities
+              ? String(row.Amenities || row.amenities)
+                  .split(",")
+                  .map((a: string) => a.trim())
+                  .filter(Boolean)
+              : [],
+          mapsUrl: row["Maps URL"] || row.mapsUrl || row.MapsUrl || null,
+          website: row.Website || row.website || null,
+          contact: row.Contact || row.contact || null,
           createdAt: Date.now(),
           createdBy: userId,
         };
@@ -73,7 +95,9 @@ export async function POST(request: Request) {
         results.success++;
       } catch (error: any) {
         results.failed++;
-        results.errors.push(`Row ${i + 2}: ${error.message || "Unknown error"}`);
+        results.errors.push(
+          `Row ${i + 2}: ${error.message || "Unknown error"}`,
+        );
       }
     }
 
@@ -83,7 +107,9 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error("Bulk import error:", error);
-    return NextResponse.json({ error: "Failed to import hotels", details: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to import hotels", details: error.message },
+      { status: 500 },
+    );
   }
 }
-

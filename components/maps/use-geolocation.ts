@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-export type GeolocationStatus = "idle" | "prompt" | "granted" | "denied" | "error";
+export type GeolocationStatus =
+  | "idle"
+  | "prompt"
+  | "granted"
+  | "denied"
+  | "error";
 
 export interface CurrentLocation {
   lat: number;
@@ -36,7 +41,7 @@ export function useGeolocation() {
         setStatus(err.code === 1 ? "denied" : "error");
         setError(err.message || "Failed to get location");
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   }, []);
 
@@ -46,5 +51,3 @@ export function useGeolocation() {
 
   return { status, location, error, request };
 }
-
-

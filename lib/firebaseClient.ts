@@ -1,5 +1,5 @@
-import { FirebaseApp, getApps, initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
+import { type FirebaseApp, getApps, initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -35,6 +35,3 @@ export function getClientDb() {
   const app = getFirebaseApp();
   return getFirestore(app);
 }
-
-
-

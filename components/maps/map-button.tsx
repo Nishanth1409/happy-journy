@@ -1,13 +1,19 @@
 "use client";
 
+import { ExternalLink, MapPin, Navigation, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation, ExternalLink, Route } from "lucide-react";
-import { openInMaps, generateMapsDirectionsUrl } from "@/lib/maps";
+import { generateMapsDirectionsUrl, openInMaps } from "@/lib/maps";
 
 interface MapButtonProps {
   url: string;
   title: string;
-  variant?: "default" | "outline" | "ghost" | "link" | "destructive" | "secondary";
+  variant?:
+    | "default"
+    | "outline"
+    | "ghost"
+    | "link"
+    | "destructive"
+    | "secondary";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   showIcon?: boolean;

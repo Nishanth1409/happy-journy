@@ -19,9 +19,11 @@ export async function GET(request: Request) {
     const ip = parseClientIp(request);
 
     // Prefer querying with the client IP when available
-    const primaryUrl = ip ? `https://ipapi.co/${encodeURIComponent(ip)}/json/` : "https://ipapi.co/json/";
-    let res = await fetch(primaryUrl, { cache: "no-store" });
-    let data: any = await res.json();
+    const primaryUrl = ip
+      ? `https://ipapi.co/${encodeURIComponent(ip)}/json/`
+      : "https://ipapi.co/json/";
+    const res = await fetch(primaryUrl, { cache: "no-store" });
+    const data: any = await res.json();
 
     let lat = Number(data?.latitude);
     let lng = Number(data?.longitude);
@@ -31,7 +33,9 @@ export async function GET(request: Request) {
     // Fallback to ipwho.is if ipapi has no coordinates
     if (Number.isNaN(lat) || Number.isNaN(lng)) {
       const ipParam = ip ? `/${encodeURIComponent(ip)}` : "";
-      const alt = await fetch(`https://ipwho.is${ipParam}`, { cache: "no-store" });
+      const alt = await fetch(`https://ipwho.is${ipParam}`, {
+        cache: "no-store",
+      });
       const adata: any = await alt.json();
       lat = Number(adata?.latitude);
       lng = Number(adata?.longitude);
@@ -42,7 +46,10 @@ export async function GET(request: Request) {
     // Fallback to ip-api.com if still missing
     if (Number.isNaN(lat) || Number.isNaN(lng)) {
       const ipParam = ip ? `/${encodeURIComponent(ip)}` : "";
-      const alt2 = await fetch(`http://ip-api.com/json${ipParam}?fields=status,country,regionName,city,lat,lon`, { cache: "no-store" });
+      const alt2 = await fetch(
+        `http://ip-api.com/json${ipParam}?fields=status,country,regionName,city,lat,lon`,
+        { cache: "no-store" },
+      );
       const a2: any = await alt2.json();
       if (a2?.status === "success") {
         lat = Number(a2.lat);
@@ -57,8 +64,9 @@ export async function GET(request: Request) {
     }
     return NextResponse.json({ lat, lng, city, state: region, ip: ip || null });
   } catch {
-    return NextResponse.json({ error: "IP geolocation failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "IP geolocation failed" },
+      { status: 500 },
+    );
   }
 }
-
-

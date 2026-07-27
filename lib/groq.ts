@@ -15,5 +15,3 @@ export function getGroqModel() {
   // Using llama-3.1-8b-instant as it's still supported
   return process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 }
-
-

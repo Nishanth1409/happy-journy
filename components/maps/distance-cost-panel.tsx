@@ -1,12 +1,12 @@
 "use client";
 
+import { Crosshair, Navigation } from "lucide-react";
 import { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useGeolocation } from "./use-geolocation";
-import { haversineKm, estimateCostInINR, type Coordinates } from "@/lib/geo";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { estimateCostInINR, haversineKm } from "@/lib/geo";
 import { generateMapsDirectionsUrl } from "@/lib/maps";
-import { Navigation, Crosshair, MapPin } from "lucide-react";
+import { useGeolocation } from "./use-geolocation";
 
 interface DestinationPoint {
   name: string;
@@ -30,13 +30,14 @@ export function DistanceCostPanel({
   const { status, location, error, request } = useGeolocation();
 
   const rows = useMemo(() => {
-    if (!location) return [] as Array<{
-      name: string;
-      location: string;
-      distanceKm?: number;
-      costINR?: number;
-      directionsUrl?: string;
-    }>;
+    if (!location)
+      return [] as Array<{
+        name: string;
+        location: string;
+        distanceKm?: number;
+        costINR?: number;
+        directionsUrl?: string;
+      }>;
 
     return destinations.map((d) => {
       let distanceKm: number | undefined;
@@ -44,23 +45,33 @@ export function DistanceCostPanel({
       if (typeof d.lat === "number" && typeof d.lng === "number") {
         distanceKm = haversineKm(
           { lat: location.lat, lng: location.lng },
-          { lat: d.lat, lng: d.lng }
+          { lat: d.lat, lng: d.lng },
         );
         directionsUrl = generateMapsDirectionsUrl(
           `${location.lat},${location.lng}`,
-          `${d.lat},${d.lng}`
+          `${d.lat},${d.lng}`,
         );
       } else {
         directionsUrl = generateMapsDirectionsUrl(
           `${location.lat},${location.lng}`,
-          d.mapsQuery || d.location
+          d.mapsQuery || d.location,
         );
       }
 
-      const cost = typeof distanceKm === "number"
-        ? estimateCostInINR(distanceKm, { perKm: costPerKmINR, baseFare: baseFareINR })
-        : undefined;
-      return { name: d.name, location: d.location, distanceKm, costINR: cost, directionsUrl };
+      const cost =
+        typeof distanceKm === "number"
+          ? estimateCostInINR(distanceKm, {
+              perKm: costPerKmINR,
+              baseFare: baseFareINR,
+            })
+          : undefined;
+      return {
+        name: d.name,
+        location: d.location,
+        distanceKm,
+        costINR: cost,
+        directionsUrl,
+      };
     });
   }, [location, destinations, costPerKmINR, baseFareINR]);
 
@@ -95,13 +106,19 @@ export function DistanceCostPanel({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {rows.map((r, i) => (
-            <div key={i} className="p-3 border rounded-lg flex items-center justify-between gap-4">
+            <div
+              key={i}
+              className="p-3 border rounded-lg flex items-center justify-between gap-4"
+            >
               <div>
                 <div className="font-medium">{r.name}</div>
-                <div className="text-xs text-muted-foreground">{r.location}</div>
+                <div className="text-xs text-muted-foreground">
+                  {r.location}
+                </div>
                 {typeof r.distanceKm === "number" && (
                   <div className="text-xs mt-1">
-                    ~{r.distanceKm.toFixed(1)} km • ₹{r.costINR?.toLocaleString()}
+                    ~{r.distanceKm.toFixed(1)} km • ₹
+                    {r.costINR?.toLocaleString()}
                   </div>
                 )}
               </div>
@@ -109,7 +126,13 @@ export function DistanceCostPanel({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(r.directionsUrl, '_blank', 'noopener,noreferrer')}
+                  onClick={() =>
+                    window.open(
+                      r.directionsUrl,
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
                   className="flex items-center gap-2"
                 >
                   <Navigation className="w-4 h-4" />
@@ -123,5 +146,3 @@ export function DistanceCostPanel({
     </Card>
   );
 }
-
-

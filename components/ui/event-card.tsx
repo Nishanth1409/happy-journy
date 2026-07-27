@@ -1,9 +1,16 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Calendar,
+  Clock,
+  ExternalLink,
+  IndianRupee,
+  MapPin,
+  Users,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Clock, Users, IndianRupee, ExternalLink } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface EventCardProps {
   event: {
@@ -33,31 +40,34 @@ interface EventCardProps {
 export function EventCard({ event }: EventCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const formatTime = (timeString: string) => {
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
   const isUpcoming = new Date(event.eventDate) > new Date();
-  const capacityFull = event.maxCapacity && event.currentCapacity && event.currentCapacity >= event.maxCapacity;
+  const capacityFull =
+    event.maxCapacity &&
+    event.currentCapacity &&
+    event.currentCapacity >= event.maxCapacity;
 
   return (
     <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200 card-hover-enhanced">
       {event.imageUrl && (
         <div className="h-32 relative overflow-hidden">
-          <img 
-            src={event.imageUrl} 
+          <img
+            src={event.imageUrl}
             alt={event.title}
             className="w-full h-full object-cover"
           />
@@ -70,31 +80,49 @@ export function EventCard({ event }: EventCardProps) {
           </div>
           {!isUpcoming && (
             <div className="absolute top-2 right-2">
-              <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Past Event</Badge>
+              <Badge
+                variant="outline"
+                className="bg-red-100 text-red-800 border-red-300"
+              >
+                Past Event
+              </Badge>
             </div>
           )}
           {capacityFull && (
             <div className="absolute bottom-2 right-2">
-              <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
+              <Badge
+                variant="outline"
+                className="bg-red-100 text-red-800 border-red-300"
+              >
                 Sold Out
               </Badge>
             </div>
           )}
         </div>
       )}
-      
+
       <CardHeader className="pb-2">
-        <CardTitle className="text-base leading-tight line-clamp-2">{event.title}</CardTitle>
+        <CardTitle className="text-base leading-tight line-clamp-2">
+          {event.title}
+        </CardTitle>
         {!event.imageUrl && (
           <div className="flex items-center gap-2">
             {event.category && (
               <Badge variant="secondary">{event.category}</Badge>
             )}
             {!isUpcoming && (
-              <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Past Event</Badge>
+              <Badge
+                variant="outline"
+                className="bg-red-100 text-red-800 border-red-300"
+              >
+                Past Event
+              </Badge>
             )}
             {capacityFull && (
-              <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">
+              <Badge
+                variant="outline"
+                className="bg-red-100 text-red-800 border-red-300"
+              >
                 Sold Out
               </Badge>
             )}
@@ -103,7 +131,9 @@ export function EventCard({ event }: EventCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-2">
-        <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>
+        <p className="text-xs text-muted-foreground line-clamp-2">
+          {event.description}
+        </p>
 
         <div className="space-y-1">
           <div className="flex items-center gap-1 text-xs">
@@ -172,7 +202,12 @@ export function EventCard({ event }: EventCardProps) {
 
         <div className="flex gap-1 pt-1">
           {event.mapsUrl && (
-            <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="flex-1 text-xs"
+            >
               <a href={event.mapsUrl} target="_blank" rel="noopener noreferrer">
                 <MapPin className="w-3 h-3 mr-1" />
                 Map
@@ -180,7 +215,12 @@ export function EventCard({ event }: EventCardProps) {
             </Button>
           )}
           {event.website && (
-            <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="flex-1 text-xs"
+            >
               <a href={event.website} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-3 h-3 mr-1" />
                 Site
@@ -192,7 +232,9 @@ export function EventCard({ event }: EventCardProps) {
         {(event.contactEmail || event.contactPhone) && (
           <div className="text-xs text-muted-foreground pt-1 border-t">
             <div className="font-medium">Contact:</div>
-            {event.contactEmail && <div className="truncate">{event.contactEmail}</div>}
+            {event.contactEmail && (
+              <div className="truncate">{event.contactEmail}</div>
+            )}
             {event.contactPhone && <div>{event.contactPhone}</div>}
           </div>
         )}

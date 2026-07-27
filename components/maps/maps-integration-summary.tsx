@@ -1,10 +1,16 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ExternalLink,
+  Globe,
+  Info,
+  MapPin,
+  Navigation,
+  Route,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MapButton } from "./map-button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateMapsSearchUrl, generateTripRoute } from "@/lib/maps";
-import { MapPin, Navigation, ExternalLink, Globe, Route, Info } from "lucide-react";
 
 interface MapsIntegrationSummaryProps {
   destinations?: string[];
@@ -13,80 +19,89 @@ interface MapsIntegrationSummaryProps {
 
 export function MapsIntegrationSummary({
   destinations = [],
-  className = ""
+  className = "",
 }: MapsIntegrationSummaryProps) {
   const features = [
     {
       icon: <MapPin className="w-5 h-5" />,
       title: "Precise Location Mapping",
-      description: "Every destination, activity, and accommodation has accurate Google Maps integration with proper location details."
+      description:
+        "Every destination, activity, and accommodation has accurate Google Maps integration with proper location details.",
     },
     {
       icon: <Navigation className="w-5 h-5" />,
       title: "Step-by-Step Directions",
-      description: "Get turn-by-turn navigation between any two points in your trip itinerary."
+      description:
+        "Get turn-by-turn navigation between any two points in your trip itinerary.",
     },
     {
       icon: <Route className="w-5 h-5" />,
       title: "Complete Route Planning",
-      description: "View your entire trip route with all destinations plotted on Google Maps."
+      description:
+        "View your entire trip route with all destinations plotted on Google Maps.",
     },
     {
       icon: <Globe className="w-5 h-5" />,
       title: "Offline Access Ready",
-      description: "Save maps offline in Google Maps app for areas with poor internet connectivity."
+      description:
+        "Save maps offline in Google Maps app for areas with poor internet connectivity.",
     },
     {
       icon: <ExternalLink className="w-5 h-5" />,
       title: "One-Click Integration",
-      description: "All map links open directly in Google Maps with proper coordinates and search terms."
+      description:
+        "All map links open directly in Google Maps with proper coordinates and search terms.",
     },
     {
       icon: <Info className="w-5 h-5" />,
       title: "Local Area Information",
-      description: "Get detailed information about transportation options, nearby facilities, and local tips."
-    }
+      description:
+        "Get detailed information about transportation options, nearby facilities, and local tips.",
+    },
   ];
 
   const handleExploreIndia = () => {
     const indiaMapUrl = generateMapsSearchUrl("India");
-    window.open(indiaMapUrl, '_blank', 'noopener,noreferrer');
+    window.open(indiaMapUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleViewTripRoute = () => {
     if (destinations.length > 0) {
       // Create proper destination objects for generateTripRoute
-      const destinationObjects = destinations.map(dest => ({
+      const destinationObjects = destinations.map((dest) => ({
         name: dest,
         city: dest,
         state: "",
-        address: ""
+        address: "",
       }));
-      
+
       const tripRoute = generateTripRoute(destinationObjects);
-      
+
       if (tripRoute.routeUrl) {
-        window.open(tripRoute.routeUrl, '_blank', 'noopener,noreferrer');
+        window.open(tripRoute.routeUrl, "_blank", "noopener,noreferrer");
       } else {
         // Fallback: create a simple multi-stop route
         if (destinations.length === 1) {
           const searchUrl = generateMapsSearchUrl(destinations[0]);
-          window.open(searchUrl, '_blank', 'noopener,noreferrer');
+          window.open(searchUrl, "_blank", "noopener,noreferrer");
         } else if (destinations.length > 1) {
-          const encodedDestinations = destinations.map(dest => encodeURIComponent(dest));
+          const encodedDestinations = destinations.map((dest) =>
+            encodeURIComponent(dest),
+          );
           const origin = encodedDestinations[0];
-          const destination = encodedDestinations[encodedDestinations.length - 1];
+          const destination =
+            encodedDestinations[encodedDestinations.length - 1];
           const waypoints = encodedDestinations.slice(1, -1);
-          
+
           let routeUrl;
           if (waypoints.length > 0) {
-            const waypointsParam = waypoints.join('|');
+            const waypointsParam = waypoints.join("|");
             routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsParam}`;
           } else {
             routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
           }
-          
-          window.open(routeUrl, '_blank', 'noopener,noreferrer');
+
+          window.open(routeUrl, "_blank", "noopener,noreferrer");
         }
       }
     }
@@ -103,12 +118,20 @@ export function MapsIntegrationSummary({
       <CardContent className="space-y-6">
         {/* Quick Actions */}
         <div className="flex flex-wrap gap-3">
-          <Button onClick={handleExploreIndia} variant="outline" className="flex items-center gap-2 flex-shrink-0">
+          <Button
+            onClick={handleExploreIndia}
+            variant="outline"
+            className="flex items-center gap-2 flex-shrink-0"
+          >
             <Globe className="w-4 h-4" />
             Explore India
           </Button>
           {destinations.length > 1 && (
-            <Button onClick={handleViewTripRoute} variant="outline" className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              onClick={handleViewTripRoute}
+              variant="outline"
+              className="flex items-center gap-2 flex-shrink-0"
+            >
               <Route className="w-4 h-4" />
               View Trip Route
             </Button>
@@ -124,7 +147,9 @@ export function MapsIntegrationSummary({
               </div>
               <div className="flex-1">
                 <h4 className="font-medium mb-1">{feature.title}</h4>
-                <p className="text-sm text-muted-foreground">{feature.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {feature.description}
+                </p>
               </div>
             </div>
           ))}
@@ -139,23 +164,36 @@ export function MapsIntegrationSummary({
           <div className="space-y-2 text-sm text-muted-foreground">
             <div className="flex items-start gap-2">
               <span className="text-green-600 mt-1">•</span>
-              <span>Each location includes precise coordinates and search terms for accurate mapping</span>
+              <span>
+                Each location includes precise coordinates and search terms for
+                accurate mapping
+              </span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-green-600 mt-1">•</span>
-              <span>Map links automatically open in your default browser's Google Maps</span>
+              <span>
+                Map links automatically open in your default browser's Google
+                Maps
+              </span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-green-600 mt-1">•</span>
-              <span>All links include "India" in the search for better local results</span>
+              <span>
+                All links include "India" in the search for better local results
+              </span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-green-600 mt-1">•</span>
-              <span>Directions consider local traffic patterns and transportation options</span>
+              <span>
+                Directions consider local traffic patterns and transportation
+                options
+              </span>
             </div>
             <div className="flex items-start gap-2">
               <span className="text-green-600 mt-1">•</span>
-              <span>Mobile-friendly integration works seamlessly on all devices</span>
+              <span>
+                Mobile-friendly integration works seamlessly on all devices
+              </span>
             </div>
           </div>
         </div>
@@ -170,18 +208,24 @@ export function MapsIntegrationSummary({
               "Gateway of India, Mumbai",
               "Red Fort, Delhi",
               "Mysore Palace, Karnataka",
-              "Hawa Mahal, Jaipur"
+              "Hawa Mahal, Jaipur",
             ].map((destination, index) => (
               <Button
                 key={index}
                 variant="ghost"
                 size="sm"
-                onClick={() => window.open(generateMapsSearchUrl(destination), '_blank', 'noopener,noreferrer')}
+                onClick={() =>
+                  window.open(
+                    generateMapsSearchUrl(destination),
+                    "_blank",
+                    "noopener,noreferrer",
+                  )
+                }
                 className="flex items-center gap-2 transition-all duration-200 hover:scale-105 btn-hover-enhanced"
-                title={`Open ${destination.split(',')[0]} in Google Maps`}
+                title={`Open ${destination.split(",")[0]} in Google Maps`}
               >
                 <MapPin className="w-4 h-4" />
-                {destination.split(',')[0]}
+                {destination.split(",")[0]}
                 <ExternalLink className="w-3 h-3 opacity-70" />
               </Button>
             ))}
@@ -193,8 +237,9 @@ export function MapsIntegrationSummary({
           <div className="flex items-center gap-2">
             <ExternalLink className="w-3 h-3" />
             <span>
-              All map features powered by Google Maps. Links open in new tabs for seamless navigation.
-              For best experience, use the Google Maps mobile app for offline access and real-time updates.
+              All map features powered by Google Maps. Links open in new tabs
+              for seamless navigation. For best experience, use the Google Maps
+              mobile app for offline access and real-time updates.
             </span>
           </div>
         </div>
@@ -209,18 +254,26 @@ interface MapStatsProps {
   className?: string;
 }
 
-export function MapStats({ totalLocations, totalActivities, className = "" }: MapStatsProps) {
+export function MapStats({
+  totalLocations,
+  totalActivities,
+  className = "",
+}: MapStatsProps) {
   return (
     <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${className}`}>
       <Card>
         <CardContent className="pt-6">
-          <div className="text-2xl font-bold text-blue-600">{totalLocations}</div>
+          <div className="text-2xl font-bold text-blue-600">
+            {totalLocations}
+          </div>
           <p className="text-xs text-muted-foreground">Mapped Locations</p>
         </CardContent>
       </Card>
       <Card>
         <CardContent className="pt-6">
-          <div className="text-2xl font-bold text-green-600">{totalActivities}</div>
+          <div className="text-2xl font-bold text-green-600">
+            {totalActivities}
+          </div>
           <p className="text-xs text-muted-foreground">Mapped Activities</p>
         </CardContent>
       </Card>

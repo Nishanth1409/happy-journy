@@ -1,10 +1,10 @@
 "use client";
 
+import { ExternalLink, MapPin, Maximize2, X } from "lucide-react";
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { MapButton } from "./map-button";
-import { MapPin, ExternalLink, Maximize2, X } from "lucide-react";
 
 interface MapPreviewProps {
   query: string;
@@ -28,7 +28,7 @@ export function MapPreview({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Generate static map URL (requires Google Maps Static API key)
-  const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(query)}&zoom=${zoom}&size=${width}x${height}&key=YOUR_STATIC_API_KEY`;
+  const _staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(query)}&zoom=${zoom}&size=${width}x${height}&key=YOUR_STATIC_API_KEY`;
 
   // Generate Google Maps URL
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
@@ -38,14 +38,16 @@ export function MapPreview({
   };
 
   return (
-    <Card className={`${className} ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
+    <Card
+      className={`${className} ${isFullscreen ? "fixed inset-4 z-50" : ""}`}
+    >
       <CardContent className="p-0">
         <div className="relative">
           {/* Map Preview Area */}
           <div
             className={`bg-muted flex items-center justify-center border-b ${
-              isFullscreen 
-                ? 'w-full h-full min-h-[400px]' 
+              isFullscreen
+                ? "w-full h-full min-h-[400px]"
                 : `w-[${width}px] h-[${height}px]`
             }`}
           >
@@ -70,7 +72,7 @@ export function MapPreview({
                   className="flex items-center gap-2"
                 >
                   <Maximize2 className="w-4 h-4" />
-                  {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                  {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                 </Button>
               </div>
             </div>
@@ -122,7 +124,12 @@ interface LocationPreviewProps {
   className?: string;
 }
 
-export function LocationPreview({ name, location, mapsUrl, className = "" }: LocationPreviewProps) {
+export function LocationPreview({
+  name,
+  location,
+  mapsUrl,
+  className = "",
+}: LocationPreviewProps) {
   const query = `${name}, ${location}`;
 
   return (
@@ -135,11 +142,7 @@ export function LocationPreview({ name, location, mapsUrl, className = "" }: Loc
           </div>
           <div className="flex gap-2">
             {mapsUrl ? (
-              <MapButton
-                url={mapsUrl}
-                title={name}
-                size="sm"
-              />
+              <MapButton url={mapsUrl} title={name} size="sm" />
             ) : (
               <MapButton
                 url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`}
@@ -165,7 +168,9 @@ interface MapGridProps {
 
 export function MapGrid({ locations, className = "" }: MapGridProps) {
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${className}`}>
+    <div
+      className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${className}`}
+    >
       {locations.map((location, index) => (
         <LocationPreview
           key={index}

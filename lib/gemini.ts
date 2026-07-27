@@ -19,5 +19,3 @@ export function getGenerativeModel(modelName?: string) {
   const resolved = modelName || process.env.GEMINI_MODEL || "gemini-1.5-flash";
   return client.getGenerativeModel({ model: resolved });
 }
-
-

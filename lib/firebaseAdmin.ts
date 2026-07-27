@@ -1,7 +1,7 @@
-import { App, cert, getApps, initializeApp } from "firebase-admin/app";
-import { Firestore, getFirestore } from "firebase-admin/firestore";
+import { type App, cert, getApps, initializeApp } from "firebase-admin/app";
+import { type Firestore, getFirestore } from "firebase-admin/firestore";
 
-let adminApp: App | undefined;
+let _adminApp: App | undefined;
 let db: Firestore | undefined;
 
 export function getAdminDb(): Firestore {
@@ -16,13 +16,13 @@ export function getAdminDb(): Firestore {
   }
 
   // Support escaped newlines in env
-  if (privateKey.startsWith("\"") && privateKey.endsWith("\"")) {
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
     privateKey = privateKey.slice(1, -1);
   }
   privateKey = privateKey.replace(/\\n/g, "\n");
 
   if (!getApps().length) {
-    adminApp = initializeApp({
+    _adminApp = initializeApp({
       credential: cert({
         projectId,
         clientEmail,
@@ -35,10 +35,7 @@ export function getAdminDb(): Firestore {
   db = getFirestore();
   // Avoid errors when optional fields are undefined
   try {
-    // @ts-ignore - settings is available on Firestore instance
     db.settings({ ignoreUndefinedProperties: true });
   } catch {}
   return db;
 }
-
-

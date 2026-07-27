@@ -14,7 +14,12 @@ export async function GET(request: Request) {
   const debug = searchParams.get("debug") === "1";
 
   const hasValidLatLng =
-    latStr !== null && lngStr !== null && latStr !== "" && lngStr !== "" && !Number.isNaN(lat) && !Number.isNaN(lng);
+    latStr !== null &&
+    lngStr !== null &&
+    latStr !== "" &&
+    lngStr !== "" &&
+    !Number.isNaN(lat) &&
+    !Number.isNaN(lng);
 
   const db = getAdminDb();
 
@@ -49,7 +54,11 @@ export async function GET(request: Request) {
     };
     const cityLower = city.trim().toLowerCase();
     const aliasList = aliases[cityLower] || [cityLower];
-    hotels = allHotels.filter((h: any) => aliasList.includes(String(h.city ?? "").toLowerCase()) || aliasList.includes(String(h.cityLower ?? "").toLowerCase()));
+    hotels = allHotels.filter(
+      (h: any) =>
+        aliasList.includes(String(h.city ?? "").toLowerCase()) ||
+        aliasList.includes(String(h.cityLower ?? "").toLowerCase()),
+    );
   }
 
   // If lat/lng provided, apply simple Haversine filter server-side
@@ -81,7 +90,7 @@ export async function GET(request: Request) {
               reason: "valid lat/lng provided",
             },
           }
-        : { hotels: filtered }
+        : { hotels: filtered },
     );
   }
 
@@ -89,12 +98,12 @@ export async function GET(request: Request) {
     const meta = {
       mode: city ? "city" : "all",
       count: hotels.length,
-      sample: hotels.slice(0, 10).map((h: any) => ({ id: h.id, city: h.city, cityLower: h.cityLower })),
+      sample: hotels
+        .slice(0, 10)
+        .map((h: any) => ({ id: h.id, city: h.city, cityLower: h.cityLower })),
     };
     return NextResponse.json({ hotels, meta });
   }
 
   return NextResponse.json({ hotels });
 }
-
-

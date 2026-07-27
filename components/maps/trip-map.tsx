@@ -1,11 +1,11 @@
 "use client";
 
+import { ExternalLink, MapPin, Navigation, Route } from "lucide-react";
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { generateMapsDirectionsUrl, generateTripRoute } from "@/lib/maps";
 import { MapButton } from "./map-button";
-import { generateTripRoute, generateMapsDirectionsUrl } from "@/lib/maps";
-import { MapPin, Route, Navigation, ExternalLink } from "lucide-react";
 
 interface TripDestination {
   name: string;
@@ -20,25 +20,33 @@ interface TripMapProps {
   className?: string;
 }
 
-export function TripMap({ destinations, title = "Trip Route", className = "" }: TripMapProps) {
-  const [selectedOrigin, setSelectedOrigin] = useState<string>("");
-  const [selectedDestination, setSelectedDestination] = useState<string>("");
+export function TripMap({
+  destinations,
+  title = "Trip Route",
+  className = "",
+}: TripMapProps) {
+  const [_selectedOrigin, _setSelectedOrigin] = useState<string>("");
+  const [_selectedDestination, _setSelectedDestination] = useState<string>("");
 
-  const validDestinations = destinations.filter(dest => dest.name && dest.location);
+  const validDestinations = destinations.filter(
+    (dest) => dest.name && dest.location,
+  );
 
-  const tripRoute = generateTripRoute(validDestinations.map(dest => ({
-    name: dest.name,
-    city: dest.location,
-  })));
+  const tripRoute = generateTripRoute(
+    validDestinations.map((dest) => ({
+      name: dest.name,
+      city: dest.location,
+    })),
+  );
 
   const handleDirections = (origin: string, destination: string) => {
     const directionsUrl = generateMapsDirectionsUrl(origin, destination);
-    window.open(directionsUrl, '_blank', 'noopener,noreferrer');
+    window.open(directionsUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleViewAllRoute = () => {
     if (tripRoute.routeUrl) {
-      window.open(tripRoute.routeUrl, '_blank', 'noopener,noreferrer');
+      window.open(tripRoute.routeUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -67,14 +75,19 @@ export function TripMap({ destinations, title = "Trip Route", className = "" }: 
         {/* Destination List */}
         <div className="space-y-3">
           {validDestinations.map((dest, index) => (
-            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+            <div
+              key={index}
+              className="flex items-center justify-between p-3 border rounded-lg"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold">
                   {dest.day || index + 1}
                 </div>
                 <div>
                   <div className="font-medium">{dest.name}</div>
-                  <div className="text-sm text-muted-foreground">{dest.location}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {dest.location}
+                  </div>
                 </div>
               </div>
 
@@ -93,10 +106,12 @@ export function TripMap({ destinations, title = "Trip Route", className = "" }: 
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDirections(
-                      validDestinations[index - 1].location,
-                      dest.location
-                    )}
+                    onClick={() =>
+                      handleDirections(
+                        validDestinations[index - 1].location,
+                        dest.location,
+                      )
+                    }
                     title={`Get directions from ${validDestinations[index - 1].name} to ${dest.name}`}
                   >
                     <Navigation className="w-4 h-4" />
@@ -113,8 +128,8 @@ export function TripMap({ destinations, title = "Trip Route", className = "" }: 
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="w-4 h-4" />
               <span>
-                {validDestinations.length} destinations •
-                Click "View Complete Route" to see the full itinerary in Google Maps
+                {validDestinations.length} destinations • Click "View Complete
+                Route" to see the full itinerary in Google Maps
               </span>
             </div>
           </div>
@@ -124,7 +139,10 @@ export function TripMap({ destinations, title = "Trip Route", className = "" }: 
         <div className="text-xs text-muted-foreground border-t pt-3">
           <div className="flex items-center gap-2">
             <ExternalLink className="w-3 h-3" />
-            <span>All map links open in Google Maps for accurate navigation and directions</span>
+            <span>
+              All map links open in Google Maps for accurate navigation and
+              directions
+            </span>
           </div>
         </div>
       </CardContent>
@@ -138,7 +156,7 @@ interface QuickMapProps {
 }
 
 export function QuickMap({ destinations, className = "" }: QuickMapProps) {
-  const validDestinations = destinations.filter(dest => dest.mapsUrl);
+  const validDestinations = destinations.filter((dest) => dest.mapsUrl);
 
   if (validDestinations.length === 0) return null;
 

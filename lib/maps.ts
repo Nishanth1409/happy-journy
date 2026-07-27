@@ -26,7 +26,7 @@ export function generateMapsSearchUrl(query: string): string {
 export function generateMapsDirectionsUrl(
   origin: string,
   destination: string,
-  travelMode: 'driving' | 'walking' | 'transit' | 'bicycling' = 'driving'
+  travelMode: "driving" | "walking" | "transit" | "bicycling" = "driving",
 ): string {
   const encodedOrigin = encodeURIComponent(origin);
   const encodedDestination = encodeURIComponent(destination);
@@ -43,7 +43,11 @@ export function generateMapsPlaceUrl(placeId: string): string {
 /**
  * Generate Google Maps coordinates URL
  */
-export function generateMapsCoordinatesUrl(lat: number, lng: number, zoom: number = 15): string {
+export function generateMapsCoordinatesUrl(
+  lat: number,
+  lng: number,
+  zoom: number = 15,
+): string {
   return `https://www.google.com/maps/@${lat},${lng},${zoom}z`;
 }
 
@@ -53,11 +57,13 @@ export function generateMapsCoordinatesUrl(lat: number, lng: number, zoom: numbe
 export function generateMapsMultiStopRoute(
   waypoints: string[],
   origin?: string,
-  destination?: string
+  destination?: string,
 ): string {
-  if (waypoints.length === 0) return '';
+  if (waypoints.length === 0) return "";
 
-  const encodedWaypoints = waypoints.map(wp => encodeURIComponent(wp)).join('|');
+  const encodedWaypoints = waypoints
+    .map((wp) => encodeURIComponent(wp))
+    .join("|");
 
   if (origin && destination) {
     const encodedOrigin = encodeURIComponent(origin);
@@ -67,17 +73,21 @@ export function generateMapsMultiStopRoute(
     const encodedOrigin = encodeURIComponent(origin);
     return `https://www.google.com/maps/dir/?api=1&origin=${encodedOrigin}&waypoints=${encodedWaypoints}`;
   } else {
-    return `https://www.google.com/maps/search/?api=1&query=${encodedWaypoints.split('|')[0]}`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodedWaypoints.split("|")[0]}`;
   }
 }
 
 /**
  * Generate street view URL
  */
-export function generateStreetViewUrl(lat: number, lng: number, heading?: number): string {
+export function generateStreetViewUrl(
+  lat: number,
+  lng: number,
+  heading?: number,
+): string {
   const baseUrl = `https://www.google.com/maps/@?api=1&map_action=pano&pano=`;
   const coords = `${lat},${lng}`;
-  const headingParam = heading ? `&heading=${heading}` : '';
+  const headingParam = heading ? `&heading=${heading}` : "";
   return `${baseUrl}${coords}${headingParam}`;
 }
 
@@ -106,15 +116,15 @@ export function generateLocationQuery(location: MapLocation): string {
     return `${name}, India`;
   }
 
-  return 'India';
+  return "India";
 }
 
 /**
  * Open Google Maps in new tab
  */
 export function openInMaps(url: string): void {
-  if (typeof window !== 'undefined') {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  if (typeof window !== "undefined") {
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 }
 
@@ -137,8 +147,10 @@ export function generateMapsShareUrl(query: string): string {
  * Validate if a string is a valid Google Maps URL
  */
 export function isValidMapsUrl(url: string): boolean {
-  return url.startsWith('https://www.google.com/maps/') ||
-         url.startsWith('https://maps.google.com/');
+  return (
+    url.startsWith("https://www.google.com/maps/") ||
+    url.startsWith("https://maps.google.com/")
+  );
 }
 
 /**
@@ -160,10 +172,14 @@ export function generateLocationMapsData(location: MapLocation) {
     shareUrl: generateMapsShareUrl(query),
     embedUrl: generateMapsEmbedUrl(query),
     hasCoordinates: !!(location.latitude && location.longitude),
-    coordinatesUrl: location.latitude && location.longitude ?
-      generateMapsCoordinatesUrl(location.latitude, location.longitude) : null,
-    streetViewUrl: location.latitude && location.longitude ?
-      generateStreetViewUrl(location.latitude, location.longitude) : null,
+    coordinatesUrl:
+      location.latitude && location.longitude
+        ? generateMapsCoordinatesUrl(location.latitude, location.longitude)
+        : null,
+    streetViewUrl:
+      location.latitude && location.longitude
+        ? generateStreetViewUrl(location.latitude, location.longitude)
+        : null,
   };
 }
 
@@ -175,10 +191,10 @@ export function generateTripRoute(destinations: MapLocation[]): {
   waypoints: string[];
   individualUrls: string[];
 } {
-  const waypoints = destinations.map(dest => generateLocationQuery(dest));
+  const waypoints = destinations.map((dest) => generateLocationQuery(dest));
   const routeUrl = generateMapsMultiStopRoute(waypoints);
-  const individualUrls = destinations.map(dest =>
-    generateMapsSearchUrl(generateLocationQuery(dest))
+  const individualUrls = destinations.map((dest) =>
+    generateMapsSearchUrl(generateLocationQuery(dest)),
   );
 
   return {

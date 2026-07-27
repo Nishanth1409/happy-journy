@@ -4,30 +4,46 @@ import { getAdminDb } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   const { isAdmin, userEmail, userId } = await ensureAdmin();
-  
+
   if (!isAdmin) {
-    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Admin access required" },
+      { status: 403 },
+    );
   }
 
   try {
     const db = getAdminDb();
-    const snap = await db.collection("partner_hotels").orderBy("createdAt", "desc").get();
+    const snap = await db
+      .collection("partner_hotels")
+      .orderBy("createdAt", "desc")
+      .get();
     const hotels = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    return NextResponse.json({ 
-      hotels, 
-      adminInfo: { userEmail, userId, accessType: userEmail ? 'email' : 'userid' }
+    return NextResponse.json({
+      hotels,
+      adminInfo: {
+        userEmail,
+        userId,
+        accessType: userEmail ? "email" : "userid",
+      },
     });
   } catch (error) {
     console.error("Error fetching hotels:", error);
-    return NextResponse.json({ error: "Failed to fetch hotels" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch hotels" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(request: Request) {
   const { isAdmin, userEmail, userId } = await ensureAdmin();
-  
+
   if (!isAdmin) {
-    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Admin access required" },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
@@ -43,9 +59,10 @@ export async function POST(request: Request) {
     amenities = [],
     mapsUrl,
     website,
-    contact
+    contact,
   } = body || {};
-  if (!name || !city) return NextResponse.json({ error: "Missing name/city" }, { status: 400 });
+  if (!name || !city)
+    return NextResponse.json({ error: "Missing name/city" }, { status: 400 });
   const db = getAdminDb();
   const doc = await db.collection("partner_hotels").add({
     name,
@@ -65,5 +82,3 @@ export async function POST(request: Request) {
   });
   return NextResponse.json({ id: doc.id }, { status: 201 });
 }
-
-

@@ -1,12 +1,17 @@
 "use client";
 
+import { ArrowRight, Clock, Navigation, Route } from "lucide-react";
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapButton } from "./map-button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { generateMapsDirectionsUrl } from "@/lib/maps";
-import { Navigation, ArrowRight, Clock, Route } from "lucide-react";
 
 interface Destination {
   name: string;
@@ -24,15 +29,21 @@ interface DirectionsPanelProps {
 export function DirectionsPanel({
   destinations,
   title = "Trip Directions",
-  className = ""
+  className = "",
 }: DirectionsPanelProps) {
   const [originIndex, setOriginIndex] = useState<number>(0);
   const [destinationIndex, setDestinationIndex] = useState<number>(1);
 
-  const validDestinations = destinations.filter(dest => dest.name && dest.location);
+  const validDestinations = destinations.filter(
+    (dest) => dest.name && dest.location,
+  );
 
   const handleGetDirections = () => {
-    if (originIndex >= 0 && destinationIndex >= 0 && originIndex !== destinationIndex) {
+    if (
+      originIndex >= 0 &&
+      destinationIndex >= 0 &&
+      originIndex !== destinationIndex
+    ) {
       const origin = validDestinations[originIndex];
       const destination = validDestinations[destinationIndex];
 
@@ -41,7 +52,7 @@ export function DirectionsPanel({
         const destQuery = `${destination.name}, ${destination.location}`;
 
         const directionsUrl = generateMapsDirectionsUrl(originQuery, destQuery);
-        window.open(directionsUrl, '_blank', 'noopener,noreferrer');
+        window.open(directionsUrl, "_blank", "noopener,noreferrer");
       }
     }
   };
@@ -55,7 +66,7 @@ export function DirectionsPanel({
       const destQuery = `${destination.name}, ${destination.location}`;
 
       const directionsUrl = generateMapsDirectionsUrl(originQuery, destQuery);
-      window.open(directionsUrl, '_blank', 'noopener,noreferrer');
+      window.open(directionsUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -87,14 +98,18 @@ export function DirectionsPanel({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">From</label>
-              <Select value={originIndex.toString()} onValueChange={(value) => setOriginIndex(parseInt(value))}>
+              <Select
+                value={originIndex.toString()}
+                onValueChange={(value) => setOriginIndex(parseInt(value, 10))}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {validDestinations.map((dest, index) => (
                     <SelectItem key={index} value={index.toString()}>
-                      {dest.day ? `Day ${dest.day}: ` : ''}{dest.name}
+                      {dest.day ? `Day ${dest.day}: ` : ""}
+                      {dest.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -107,14 +122,20 @@ export function DirectionsPanel({
 
             <div className="space-y-2">
               <label className="text-sm font-medium">To</label>
-              <Select value={destinationIndex.toString()} onValueChange={(value) => setDestinationIndex(parseInt(value))}>
+              <Select
+                value={destinationIndex.toString()}
+                onValueChange={(value) =>
+                  setDestinationIndex(parseInt(value, 10))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {validDestinations.map((dest, index) => (
                     <SelectItem key={index} value={index.toString()}>
-                      {dest.day ? `Day ${dest.day}: ` : ''}{dest.name}
+                      {dest.day ? `Day ${dest.day}: ` : ""}
+                      {dest.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -122,7 +143,11 @@ export function DirectionsPanel({
             </div>
           </div>
 
-          <Button onClick={handleGetDirections} className="w-full" disabled={originIndex === destinationIndex}>
+          <Button
+            onClick={handleGetDirections}
+            className="w-full"
+            disabled={originIndex === destinationIndex}
+          >
             <Navigation className="w-4 h-4 mr-2" />
             Get Directions
           </Button>
@@ -130,25 +155,36 @@ export function DirectionsPanel({
 
         {/* Consecutive Directions */}
         <div className="space-y-4">
-          <h4 className="font-medium">Quick Directions Between Consecutive Stops</h4>
+          <h4 className="font-medium">
+            Quick Directions Between Consecutive Stops
+          </h4>
           <div className="space-y-2">
             {validDestinations.slice(0, -1).map((dest, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 border rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-semibold">
                     {dest.day || index + 1}
                   </div>
                   <div>
                     <div className="font-medium">{dest.name}</div>
-                    <div className="text-sm text-muted-foreground">{dest.location}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {dest.location}
+                    </div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-muted-foreground" />
                   <div className="flex items-center justify-center w-8 h-8 bg-green-100 text-green-600 rounded-full text-sm font-semibold">
-                    {(validDestinations[index + 1]?.day || index + 2)}
+                    {validDestinations[index + 1]?.day || index + 2}
                   </div>
                   <div>
-                    <div className="font-medium">{validDestinations[index + 1]?.name}</div>
-                    <div className="text-sm text-muted-foreground">{validDestinations[index + 1]?.location}</div>
+                    <div className="font-medium">
+                      {validDestinations[index + 1]?.name}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {validDestinations[index + 1]?.location}
+                    </div>
                   </div>
                 </div>
 
@@ -174,8 +210,12 @@ export function DirectionsPanel({
               <h5 className="font-medium mb-1">Travel Tips</h5>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Check traffic conditions before starting your journey</li>
-                <li>• Use offline maps for areas with poor internet connectivity</li>
-                <li>• Consider local transportation options for shorter distances</li>
+                <li>
+                  • Use offline maps for areas with poor internet connectivity
+                </li>
+                <li>
+                  • Consider local transportation options for shorter distances
+                </li>
                 <li>• Save important locations as favorites for easy access</li>
               </ul>
             </div>
@@ -191,8 +231,13 @@ interface QuickDirectionsProps {
   className?: string;
 }
 
-export function QuickDirections({ destinations, className = "" }: QuickDirectionsProps) {
-  const validDestinations = destinations.filter(dest => dest.name && dest.location);
+export function QuickDirections({
+  destinations,
+  className = "",
+}: QuickDirectionsProps) {
+  const validDestinations = destinations.filter(
+    (dest) => dest.name && dest.location,
+  );
 
   if (validDestinations.length < 2) return null;
 
@@ -207,8 +252,11 @@ export function QuickDirections({ destinations, className = "" }: QuickDirection
             const originQuery = `${dest.name}, ${dest.location}`;
             const destQuery = `${validDestinations[index + 1]?.name}, ${validDestinations[index + 1]?.location}`;
 
-            const directionsUrl = generateMapsDirectionsUrl(originQuery, destQuery);
-            window.open(directionsUrl, '_blank', 'noopener,noreferrer');
+            const directionsUrl = generateMapsDirectionsUrl(
+              originQuery,
+              destQuery,
+            );
+            window.open(directionsUrl, "_blank", "noopener,noreferrer");
           }}
           className="flex items-center gap-2"
         >

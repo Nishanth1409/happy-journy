@@ -4,30 +4,46 @@ import { getAdminDb } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   const { isAdmin, userEmail, userId } = await ensureAdmin();
-  
+
   if (!isAdmin) {
-    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Admin access required" },
+      { status: 403 },
+    );
   }
 
   try {
     const db = getAdminDb();
-    const snap = await db.collection("events").orderBy("eventDate", "desc").get();
+    const snap = await db
+      .collection("events")
+      .orderBy("eventDate", "desc")
+      .get();
     const events = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    return NextResponse.json({ 
-      events, 
-      adminInfo: { userEmail, userId, accessType: userEmail ? 'email' : 'userid' }
+    return NextResponse.json({
+      events,
+      adminInfo: {
+        userEmail,
+        userId,
+        accessType: userEmail ? "email" : "userid",
+      },
     });
   } catch (error) {
     console.error("Error fetching events:", error);
-    return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch events" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(request: Request) {
   const { isAdmin, userEmail, userId } = await ensureAdmin();
-  
+
   if (!isAdmin) {
-    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Admin access required" },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
@@ -51,13 +67,16 @@ export async function POST(request: Request) {
     mapsUrl,
     website,
     tags = [],
-    isActive = true
+    isActive = true,
   } = body || {};
-  
+
   if (!title || !description || !location || !eventDate) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 },
+    );
   }
-  
+
   const db = getAdminDb();
   const doc = await db.collection("events").add({
     title,
