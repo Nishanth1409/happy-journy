@@ -45,3 +45,5 @@ next-env.d.ts
 *.docx
 POS_AND_PSO*
 PROGRAM_OUTCOMES*
+
+.cursor/
