@@ -1,38 +1,20 @@
-﻿# Happy Journey — FINAL (canonical) project
+﻿# Happy Journey
 
-**Use only this folder:** `D:\STUDIS\project\apps\HappyJourney`
+Canonical notes for contributors.
 
-| Item | Value |
-| :--- | :--- |
-| **Local path** | `apps/HappyJourney` |
-| **GitHub (canonical / push here)** | https://github.com/Nishanth1409/happy-journy |
-| **Live site (Vercel)** | https://happy-journy.vercel.app/ |
-| **Optional upstream** | remote `kartik` → https://github.com/kartikgopal01/happy-journy |
+- **GitHub:** https://github.com/Nishanth1409/happy-journy  
+- **Live:** https://happy-journy.vercel.app/  
 
-## What changed
-
-Previously there were **two** local folders for the same app:
-
-1. `HappyJourney` — live copy with `.env.local` / runtime  
-2. `happy-journy` — thin clone of your GitHub (README + CI only)
-
-They are now **merged into one**. The duplicate thin clone was removed. CI + portfolio README live in this folder. `origin` points at **Nishanth1409/happy-journy** (Vercel).
-
-## Commands
+## Run locally
 
 ```bash
-cd D:\STUDIS\project\apps\HappyJourney
-npm run dev          # local
-git push origin master   # updates GitHub → Vercel
+git clone https://github.com/Nishanth1409/happy-journy.git
+cd happy-journy
+npm install
+cp .env.example .env.local   # if present; otherwise create .env.local with Clerk/Firebase/AI keys
+npm run dev
 ```
 
-## Do not
+Never commit `.env*`, Firebase admin JSON, or other secrets.
 
-- Create a second `apps/happy-journy` clone
-- Commit `.env*` or `*firebase-adminsdk*.json`
-
-## Related (not this runtime app)
-
-- `academic/happy-journey-reports` — college documents  
-
-Updated: 2026-07-27
+See root `README.md` and `VERCEL_DEPLOYMENT.md` for full setup.
