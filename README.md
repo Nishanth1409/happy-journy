@@ -184,15 +184,20 @@ HappyJourney/
 
 ## Live & credits
 
-- **Live app:** [happy-journy.vercel.app](https://happy-journy.vercel.app/)
-- **Author:** [Nishanth K R](https://github.com/Nishanth1409) · Portfolio [nkrportfolio.vercel.app](https://nkrportfolio.vercel.app)
+| | |
+| :--- | :--- |
+| **Live** | [happy-journy.vercel.app](https://happy-journy.vercel.app/) |
+| **Author** | [Nishanth K R](https://github.com/Nishanth1409) |
+| **Collaborators** | [Kartik Gopal](https://github.com/kartikgopal01) |
+| **Portfolio** | [nkrportfolio.vercel.app](https://nkrportfolio.vercel.app) |
 
 ---
 
 <div align="center">
 
-Made with care by **Nishanth K R** — *son of a farmer, always a farmer.*
+*Son of a farmer · always a farmer.*
 
-[Portfolio](https://nkrportfolio.vercel.app) · [GitHub](https://github.com/Nishanth1409)
+[GitHub](https://github.com/Nishanth1409) · [Portfolio](https://nkrportfolio.vercel.app)
 
 </div>
+
