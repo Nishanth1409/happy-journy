@@ -47,3 +47,6 @@ POS_AND_PSO*
 PROGRAM_OUTCOMES*
 
 .cursor/
+
+# Local mockup studio (used only to regenerate README device shots)
+docs/mockup/
