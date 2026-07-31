@@ -7,7 +7,7 @@
 
 **Plan your next adventure with AI. Itineraries, budgets, maps, and trip history — all in one place.**
 
-Live: **[happy-journy.vercel.app](https://happy-journy.vercel.app/)**
+Live: **[happy-journy-two.vercel.app](https://happy-journy-two.vercel.app/)**
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev)
@@ -186,7 +186,7 @@ HappyJourney/
 
 | | |
 | :--- | :--- |
-| **Live** | [happy-journy.vercel.app](https://happy-journy.vercel.app/) |
+| **Live** | [happy-journy-two.vercel.app](https://happy-journy-two.vercel.app/) |
 | **Author** | [Nishanth K R](https://github.com/Nishanth1409) |
 | **Collaborators** | [Kartik Gopal](https://github.com/kartikgopal01) |
 | **Portfolio** | [nkrportfolio.vercel.app](https://nkrportfolio.vercel.app) |

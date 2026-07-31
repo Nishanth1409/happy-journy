@@ -3,7 +3,7 @@
 Canonical notes for contributors.
 
 - **GitHub:** https://github.com/Nishanth1409/happy-journy  
-- **Live:** https://happy-journy.vercel.app/  
+- **Live:** https://happy-journy-two.vercel.app/  
 
 ## Run locally
 
