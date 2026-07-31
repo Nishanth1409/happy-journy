@@ -232,7 +232,9 @@ export function ScrollableHeader() {
             asChild
             className="border border-border icon-hover-enhanced touch-target"
           >
-            <Link href="/trips">
+            {/* /trips is auth-gated; prefetching it while signed out hits a cross-origin
+                Clerk redirect and logs a failed fetch on every visit. */}
+            <Link href="/trips" prefetch={false}>
               <RiRoadMapLine className="h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
           </Button>

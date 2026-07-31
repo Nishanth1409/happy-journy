@@ -75,7 +75,7 @@ function ThemeLogo() {
     <img
       src={isDark ? "/logoDark.png" : "/logowhite.png"}
       alt="Happy Journey Logo"
-      className={`w-full h-60 opacity-100 transition-opacity duration-300 ${
+      className={`w-full h-32 sm:h-44 md:h-60 object-contain opacity-100 transition-opacity duration-300 ${
         isDark ? "dynamic-logo-dark" : "dynamic-logo-light"
       }`}
     />
@@ -806,8 +806,8 @@ export default function Home() {
             {/* Background Overlay */}
             <div className="absolute inset-0 bg-black/0"></div>
 
-            {/* Hero Icons */}
-            <div className="mt-8 sm:mt-12 flex gap-4 sm:gap-8 justify-center relative z-10">
+            {/* Hero Icons — the logo settles 50px down, so that offset is reserved below it */}
+            <div className="mt-8 sm:mt-12 mb-[50px] flex gap-4 sm:gap-8 justify-center relative z-10">
               <motion.div
                 initial={{ opacity: 0, y: 150 }}
                 animate={{ opacity: 1, y: 50 }}
