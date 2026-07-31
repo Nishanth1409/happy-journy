@@ -225,19 +225,32 @@ export function ScrollableHeader() {
             </Link>
           </Button>
 
-          {/* Trips Button - After Home */}
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="border border-border icon-hover-enhanced touch-target"
-          >
-            {/* /trips is auth-gated; prefetching it while signed out hits a cross-origin
-                Clerk redirect and logs a failed fetch on every visit. */}
-            <Link href="/trips" prefetch={false}>
-              <RiRoadMapLine className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Link>
-          </Button>
+          {/* Trips is auth-gated. A bare Link while signed out still triggers an RSC
+              fetch that Clerk redirects cross-origin, which logs as a failed request. */}
+          <SignedIn>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="border border-border icon-hover-enhanced touch-target"
+            >
+              <Link href="/trips">
+                <RiRoadMapLine className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Link>
+            </Button>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button
+                type="button"
+                className="inline-flex items-center justify-center h-9 w-9 border border-border rounded-md hover:bg-muted transition-colors icon-hover-enhanced touch-target"
+                aria-label="Sign in to view trips"
+                title="Sign in to view trips"
+              >
+                <RiRoadMapLine className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+            </SignInButton>
+          </SignedOut>
 
           <ThemeToggle />
 
